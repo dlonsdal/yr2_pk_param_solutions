@@ -816,7 +816,7 @@ plotc <- ggplot(data=sim, aes(x=time, y=conc))+
               fill='#82A146',
               alpha=0.2, outline.type = 'full',colour='gray44')+
   
-  geom_text(x=5, y=2.5, label="AUC 0-24", hjust= -0.25, vjust =0, size=5)
+  geom_text(x=5, y=2.5, label="AUC 0-24", hjust= -0.25, vjust =0, size=5)+theme_bw()
 
 plotd <- ggplot(data=sim, aes(x=time, y=conc))+
   geom_line()+
@@ -827,7 +827,7 @@ plotd <- ggplot(data=sim, aes(x=time, y=conc))+
           aes(ymin=0,ymax=conc),
               fill='#999FFC',
               alpha=0.2, outline.type = 'full',colour='gray44')+
-  geom_text(x=33, y=1.25, label="?", hjust= -0.25, vjust =0, size=5)
+  geom_text(x=33, y=1.25, label="?", hjust= -0.25, vjust =0, size=5)+theme_bw()
 
 library(gridExtra)
 grid.arrange(plotc, plotd,ncol=2)
