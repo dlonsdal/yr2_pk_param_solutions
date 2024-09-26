@@ -1,0 +1,859 @@
+---
+title: "Pharmacokinetic Parameter Estimations using '<TT>R</TT>': Solutions"
+output:
+  bookdown::html_document2:
+    fig_caption : TRUE
+    number_sections: no
+    toc: yes
+    toc_float: yes
+
+header-includes:
+  - \usepackage{colortbl}
+  - \usepackage{multirow}
+  - \usepackage{float}
+  - \floatplacement{figure}{H}
+  - \floatplacement{table}{H}
+  - \usepackage{booktabs}
+  - \usepackage{caption}
+  - \captionsetup{labelfont=bf,margin=12pt} 
+  - \newcommand{\blandscape}{\begin{landscape}}
+  - \newcommand{\elandscape}{\end{landscape}}
+---
+
+<style>
+h1.title {
+  font-size: 48px;
+
+  text-align: center;
+}
+h4.author { 
+  text-align: center;
+}
+body {
+text-align: justify}
+</style>
+
+<center><img src="PK.png"/></center>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.pos= "H")
+library(tidyverse)
+library(kableExtra)
+library(linpk)
+library(dplyr)
+library(DescTools)
+#setwd("/Users/reyashah/Documents/Teaching and writing/PKII/Parameter_Estimation")
+```
+
+
+# Introduction 
+
+In the self-directed learning session last week, we recapped the some of the skills gained in Year 1 around quantitative pharmacology using '<TT>R</TT>'. In today’s workshop, we will build on this learning 
+
+In this session we will recap previous skills you have learnt in reading pharmacokinetic data into <TT>R</TT>, estimating PK parameters and using <TT>ggplot2</TT> to produce plots. 
+
+We will also learn how to estimate bioavailability using these parameters, and how to save the plots you produce using <TT>ggplot2</TT>. We will recap the concept of bioequivalence and use <TT>R</TT> to perform simple calculations to assess bioequivalence.
+
+## Learning outcomes  
+ 
+* Recap use of <TT>RStudio</TT> and <TT>ggplot2</TT> to plot pharmacokinetic data, estimate pharmacokinetic parameters
+* Save plots made using <TT>ggplot2</TT>
+* Create subsets of data
+* Estimate Cmax and $AUC_{0-t}$
+* Estimate bioavailability
+* Basic estimation of bioequivalence
+* Understand the difference between arithmetic and geometric means
+* Understand the concept of $AUC_{0-\infty}$
+
+## Further learning
+
+* Use '<TT>R</TT>' to produce a plot of concentration-time data displaying mean and error bars (e.g. for 95% confidence interval or standard error)
+* Understand the FDA and EMA requirements for proving bioequivalence above the basic calculation we have performed
+* Calculate $AUC_{0-\infty}$
+* Advanced calculations required as evidence of bioequivalence for FDA/EMA approval
+This page is designed to provide you with notes of the session and be a handy resource when you come to revision. There are examples of code and the corresponding output from <TT>R</TT> as we go along.  
+
+## Accessing <TT>RStudio</TT> on a University computer
+Remember, when you are using a University computer, you need to access <TT>RStudio</TT> via the University servers. The link for this is [here](https://stats3.sgul.ac.uk/rstudio). I'd suggest saving this as a "favourite" for future access. 
+
+## Setting the working directory 
+
+A reminder to set your working directory to the folder that your data is in using the <TT>setwd()</TT> function. You can check that you have set the working directory correctly by using the <TT>getwd()</TT> function and you can view available files by using the <TT>list.files()</TT> function.
+
+````{r, echo=TRUE, eval=FALSE}
+setwd("INSERT YOUR FILE PATH HERE")
+# or if on the server: 
+setwd("~/intro_pk/intro_R/")
+getwd() # check the working directory
+list.files() # view the files available in your working directory
+
+````
+
+## Packages for this session
+
+````{r, echo=TRUE, eval=FALSE}
+.libPaths( c( .libPaths(),
+              "/homes/dlonsdale-pharmacokinetics/sghms/bms/shares/Advanced-Pharmacokinetics/4.3.2/library") )
+#note that you need the '.' before 'libPaths'
+library(tidyverse)
+
+````
+
+<br>
+
+# Part 1
+
+````{r, echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE}
+library(linpk)
+
+set.seed(2002)
+
+
+ID <- c("A", "B", "C", "D", "E")
+n=5
+
+#CL with log normal distribution
+meanlogCL <- log(2.5)
+sdlogCL <- 0.4
+CL <- rlnorm(n, meanlog = meanlogCL, sdlog = sdlogCL)
+TVV1 <- 27
+sd_v <- 4
+Vd <- rnorm(n, mean=TVV1, sd=sd_v)
+
+IV <- data.frame(ID=integer(0), Vd = numeric(0), CL=numeric(0)) 
+demos <- rbind(IV, data.frame(ID = ID, Vd = Vd, CL=CL))
+t.obs <- c(0, 0.5,1,2,4,6,10,14,18,20,24)
+simBE<-list()
+
+for(i in c(1:nrow(demos))){
+  dose<-data.frame(t.dose=0,amt=500)
+  y<-pkprofile(t.obs,cl=demos$CL[i],
+               vc=demos$Vd[i],
+               dose=dose)
+  sim<-as.data.frame(y)
+  sim$ID<-demos$ID[i]
+  simBE[[i]]<-sim 
+} 
+IV_data <-bind_rows(simBE)
+IV_data$study <- "IV"
+datasetA <- IV_data
+write.csv(datasetA, "dataset_A.csv", row.names=FALSE)
+
+set.seed(2002)
+
+ID <- c("A", "B", "C", "D", "E")
+n=5
+
+#CL with log normal distribution
+meanlogCL <- log(2.5)
+sdlogCL <- 0.4
+CL <- rlnorm(n, meanlog = meanlogCL, sdlog = sdlogCL)
+TVV1 <- 27
+sd_v <- 4
+Vd <- rnorm(n, mean=TVV1, sd=sd_v)
+ORAL <- data.frame(ID=integer(0), Vd = numeric(0), CL=numeric(0))
+demos2 <- rbind(ORAL, data.frame(ID = ID, Vd = Vd, CL=CL))
+t.obs <- c(0, 0.5,1,2,4,8,12,16,20,24)
+simBE2<-list()
+
+dose <- 500
+amt=500
+for(i in c(1:nrow(demos2))){
+  dose<-data.frame(t.dose=0,amt=500)
+  z<-pkprofile(t.obs,cl=demos2$CL[i],
+               vc=demos2$Vd[i],
+               ka=0.2,
+               dose=dose)
+  sim2<-as.data.frame(z)
+  sim2$ID<-demos2$ID[i]
+  simBE2[[i]]<-sim2 
+} 
+ORAL_data <-bind_rows(simBE2)
+ORAL_data$study <- "ORAL"
+datasetB <- ORAL_data
+write.csv(datasetB, "dataset_B.csv", row.names=FALSE)
+
+````
+
+## Data
+
+Drug X is available in oral and IV preparation. In a PK study, 5 participants (Participants A-E) were given a single dose of 500 mg Drug X intravenously, with blood samples taken every hour for PK measurements over 24 hours. 2 weeks later the same participants were given a single dose of 500 mg Drug X orally with PK measurements taken hourly for 24 hours following this. 
+
+Dataset_A contains the PK data for IV administration of Drug X 
+Dataset_B contains the PK data for oral administration of Drug X
+
+We will use these datasets for part 1 of this session. You can download the data for this session directly from GitHub. There are two files. Copy and paste my code.
+
+
+```` {r, eval=TRUE, results='hold', tidy=FALSE}
+  
+dataset_A <- read.csv("https://raw.githubusercontent.com/dlonsdal/SGUL_PK_data/refs/heads/main/pk2_param_estimate/dataset_A.csv")
+dataset_B <- read.csv("https://raw.githubusercontent.com/dlonsdal/SGUL_PK_data/refs/heads/main/pk2_param_estimate/dataset_B.csv")
+
+````
+
+<br>
+
+## Plotting the data and saving your plot
+
+### Task: plot the IV data and save your plot
+
+* use the <TT>ggplot2</TT> package to plot the data for the IV data 
+
+* group by ID using colour or symbols
+
+* label the x-axis and the y-axis with units (concentration is in mg/L; time is in hours)
+
+* add a title to each plot
+
+* use ggsave("FILENAME.JPEG") or ggsave("FILENAME.PDF") to save the plot to a jpeg or pdf file in your working directory folder
+
+* try to adjust the width and height of your saved plot. 
+ 
+ <br>
+ 
+
+``` {r, eval=FALSE, echo=TRUE}
+ggplot(data=dataset_A, aes(x=time, y=conc, col=ID))+
+  geom_line()+
+  geom_point()+
+  xlab("time (hours after dose)")+
+  ylab("concentration (mg/L)")+
+  labs(title="Concentration-time curve for Drug X given intravenously")
+
+```
+
+<br>
+
+````{r, echo=FALSE, eval = TRUE, warning=FALSE, message=FALSE, fig.cap="Concentration-time curve for Drug X given intravenously",fig.width=7,fig.height=2.5,fig.align = 'center'}
+ggplot(data=dataset_A, aes(x=time, y=conc, col=ID))+
+  geom_line()+
+  geom_point()+
+  xlab("time (hours after dose)")+
+  ylab("concentration (mg/L)")
+
+````
+<br>
+
+````{r, echo=TRUE, eval=FALSE}
+# save as JPEG specifying width
+ggsave("IV_data_small.jpeg", width=2)
+ggsave("IV_data_large.jpeg", width= 12)
+
+# go to your working directory and look at these two files. Is one more useful than the other? 
+
+# saving as as PDF is a scalable vector format and therefore more useful
+# a vector graphic can be resized, reshaped or rescaled without losing image quality 
+ggsave("IV_data.PDF")
+
+````
+<br>
+
+### Task: plot the oral data and save your plot
+
+Repeat the task above for the oral dataset
+
+<br>
+
+````{r, echo=TRUE, eval=FALSE}
+ggplot(data=dataset_B, aes(x=time, y=conc, col=ID))+
+  geom_line()+
+  geom_point()+
+  xlab("time (hours after dose)")+
+  ylab("concentration (mg/L)")+
+  labs(title="Concentration-time curve for Drug X given orally")
+
+ggsave("oral_data.pdf")
+````
+
+````{r, echo=FALSE, eval = TRUE, fig.cap="Concentration-time curve for Drug X given orally",fig.width=7,fig.height=2.5,fig.align = 'center'}
+ggplot(data=dataset_B, aes(x=time, y=conc, col=ID))+
+  geom_line()+
+  geom_point()+
+  xlab("time (hours after dose)")+
+  ylab("concentration (mg/L)")
+
+````
+<br>
+
+## Plotting data together
+You can use '<TT>R</TT>' to present your data in different ways. Here, we have combined dataset_A and dataset_B to display a summary of our data for Drug X. 
+
+````{r, echo=FALSE, eval=TRUE, fig.cap="Mean drug concentration-time curve for oral and IV Drug X with 95% confidence interval", fig.width=7, fig.height=3, fig.align='center', message=FALSE, warning=FALSE}
+dataset_D <- rbind(dataset_A, dataset_B)
+
+overall <- dataset_D %>% 
+  group_by(time,study) %>% 
+  summarise(MeanConc = mean(conc),sd=sd(conc))
+overall$CV<-overall$sd/overall$MeanConc*100
+overall<-overall %>% mutate_at(vars(MeanConc,sd,CV), round,3)
+
+
+overall$se<-overall$sd/sqrt(10)
+ciMult <- qt(0.95/2 + .5, 9)
+overall$ci <- overall$se * ciMult
+
+# Now we can plot this using ggplot
+
+ggplot(overall, aes(x=time, y=MeanConc,colour=study,group=study)) + 
+  geom_errorbar(aes(ymin=(MeanConc)-(ci), 
+                    ymax=(MeanConc+ci)), colour="black") +
+  geom_line() +
+  geom_point(size=3, shape=21, fill="white") + # 21 is filled circle
+  xlab("Time (hours)") +
+  ylab("Concentration (mg/L)") +
+  theme_bw()+
+  theme(legend.justification=c(1,1),
+        legend.position=c(1,1),
+        legend.background = element_rect(fill='transparent') )
+
+````
+
+## Estimating pharmacokinetic parameters
+
+### Task: calculate Cmax
+
+* Estimate the Cmax for each participant for the IV and the oral data
+* Estimate the mean Cmax for the IV data and the oral data
+
+**Reminder about piping**
+
+Piping is a tool that allows us to undertake multiple logical steps to achieve a desired output in our text using "<TT>%>%</TT>" between steps. Technically, <TT>%>%</TT> is found in the <TT>magrittr()</TT> package, but when you load <TT>tidyverse()</TT> , <TT>magrittr()</TT> is automatically loaded.  
+
+
+```{r, echo=TRUE, eval=TRUE}
+
+# remember to load the tidyverse package if you have not already
+# below, we tell R to take 'dataset_A', group by 'ID' then give the cmax
+dataset_A%>%
+  group_by(ID)%>%
+  summarise(cmax=max(conc))
+
+# here we tell R to take 'dataset_B', group by 'ID' then give the cmax
+dataset_B%>%
+  group_by(ID)%>%
+  summarise(cmax=max(conc))
+
+
+# here we tell R to take 'dataset_A', and give the Cmax for each ID
+# and then summarise the mean of these values - thus the output is the mean cmax
+dataset_A%>%
+  group_by(ID)%>%
+  summarise(cmax=max(conc)) %>% 
+  ungroup() %>% 
+  summarise(mean(cmax))
+
+
+# here we tell R to take 'dataset_B', and give the Cmax for each ID
+# and then summarise the mean of these values - thus the output is the mean cmax
+dataset_B%>%
+  group_by(ID)%>%
+  summarise(cmax=max(conc)) %>% 
+  ungroup() %>% 
+  summarise(mean(cmax))
+
+
+```
+
+<br>
+
+### Task: Estimate $AUC_{0-24}$
+
+* Estimate the $AUC_{0-24}$ for each participant for the IV and the oral data
+
+* Estimate the mean $AUC_{0-24}$ for the IV data and the oral data
+
+<br>
+
+```{r, echo=TRUE, eval=TRUE}
+
+library(DescTools)
+# loading this allows us to use the trapezoid function
+
+# here we tell R to take 'dataset_A', group by 'ID' then calculate the AUC
+dataset_A%>%
+  group_by(ID) %>% 
+  summarise(AUC=AUC(time,conc,method='trapezoid'))
+
+# here we tell R to take 'dataset_B', group by 'ID' then calculate the AUC
+dataset_B%>%
+  group_by(ID) %>% 
+  summarise(AUC=AUC(time,conc,method='trapezoid'))
+
+
+# here we tell R to take 'dataset_A', and calculate the AUC for each ID
+# and then summarise the mean of these values - thus the output is the mean AUC
+dataset_A %>% 
+  group_by(ID) %>% 
+  summarise(AUC=AUC(time,conc,method='trapezoid')) %>% 
+  ungroup()  %>% 
+  summarise(mAUC=
+              mean(AUC)) 
+
+
+# here we tell R to take 'dataset_B', and do the same, to give the mean AUC
+dataset_B %>% 
+  group_by(ID) %>% 
+  summarise(AUC=AUC(time,conc,method='trapezoid')) %>% 
+  ungroup()  %>% 
+  summarise(mAUC=
+              mean(AUC)) 
+
+
+```
+
+<br>
+
+## Are we using the correct mean? 
+With this code, we are calculating the arithmetic mean. The arithmetic mean is often referred to as "the mean" and relates to the sum of values. It is prone to being affected by outliers or skewed data. It is most accurate when data is not skewed and the values are independent of one another. **The arithmetic mean will always overestimate values for pharmacokinetic data**.
+
+**The geometric mean is most accurate for pharmacokinetic data**. This relates to the product of values rather than their sum. It is less affected by outliers and is more appropriate for use with skewed data or growth rates. It is calculated by multiplying _n_ numbers together and then finding the _nth_ root.
+
+We will continue using the arithmetic mean for this session, but be aware of its limitations. If you join us for the Advanced PK course, we will learn how to estimate PK parameters using the geometric mean. 
+
+<br>
+
+## Bioavailability
+
+Bioavailability (F) is the % of administered drug that reaches the systemic circulation. This can be calculated with the following formula (using $AUC_{0-t}$ where $t$ is the same for oral and intravenous data).
+
+<br>
+
+$$Bioavailability (F) = 100 .  \frac{AUC_{PO}}{AUC_{IV}}$$
+<br>
+
+Where the doses given orally and intravenously are not the same, this formula can be used to account for this. 
+
+
+$$Bioavailability (F) = 100 .  \frac{AUC_{PO}.D_{IV}}{AUC_{IV}. D_{PO}}$$
+
+
+<br>
+
+### Task
+
+* Calculate the bioavailability of Drug X
+
+
+<br>
+
+```{r time,echo=TRUE, message=FALSE}
+
+## first, combine the oral and IV datasets
+full <- rbind(dataset_A, dataset_B)
+
+## estimate the mean AUC (mAUC) for the oral and the IV study
+full %>% 
+  group_by(ID,study) %>% 
+  summarise(AUC=AUC(time,conc,method='trapezoid')) %>% 
+  group_by(study)  %>% 
+  summarise(mAUC=
+              mean(AUC))
+
+## now, use the equation above to estimate bioavailability
+full %>% 
+  group_by(ID,study) %>% 
+  summarise(AUC=AUC(time,conc,method='trapezoid')) %>% 
+  group_by(study)  %>% 
+  summarise(mAUC=
+              mean(AUC)) %>% 
+  summarise(F=100*(mAUC[study=="ORAL"]/mAUC[study=="IV"]))
+
+``` 
+
+What value did you estimate for bioavailability? 
+What do you think of this value and do you think this drug is highly bioavailable via oral administration? 
+
+<br>
+
+
+<br>
+
+# Part 2
+
+## Bioequivalence
+
+When drugs are developed as alternatives for an existing (reference) drug, for example a generic alternative to a commercially available drug, developers must demonstrate that they have very similar or equivalent pharmacological profiles and therefore we would expect their clinical efficacy and safety to be the same. 
+
+The FDA define bioequivalence as:
+"The absence of a significant difference in the rate and extent to which the active ingredient becomes available at the site of drug action when administered at the same dose under similar experimental conditions"
+
+<br>
+
+````{r, eval=TRUE, echo=FALSE, message=FALSE}
+
+library(linpk)
+library(gridExtra)
+library(grid)
+library(ggplot2)
+library(lattice)
+
+t.obs=c(seq(1,24,by=0.1))
+cl=3
+vc=15
+dose<-data.frame(t.dose=0,amt=500)
+y<-pkprofile(t.obs,cl=cl,
+             vc=vc,
+             ka=0.35,
+             dose=dose)
+sim<-as.data.frame(y)
+sim$drug <- "a"
+
+cl=3.1
+vc=15
+dose<-data.frame(t.dose=0,amt=500)
+z<-pkprofile(t.obs,cl=cl,
+             vc=vc,
+             ka=0.38,
+             dose=dose)
+sim2<-as.data.frame(z)
+sim2$drug <- "b"
+bio <- rbind(sim, sim2)
+
+plota <- ggplot(data=bio, aes(x=time, y=conc, group=interaction(drug)))+
+  geom_line()+
+  xlab("Time after dose")+
+  ylab("Plasma concentration")+
+  labs(title="Products are bioequivalent")+ylim(0, 20)+theme_bw()
+
+cl=2
+vc=18
+dose<-data.frame(t.dose=0,amt=500)
+v<-pkprofile(t.obs,cl=cl,
+             vc=vc,
+             ka=0.15,
+             dose=dose)
+sim3<-as.data.frame(v)
+sim3$drug <- "c"
+nbio <- rbind(sim, sim3)
+
+plotb <- ggplot(data=nbio, aes(x=time, y=conc, group=interaction(drug)))+
+  geom_line()+
+  xlab("Time after dose")+
+  ylab("Plasma concentration")+
+  labs(title="Products are not bioequivalent")+ylim(0, 20)+theme_bw()
+
+grid.arrange(plota,plotb,ncol=2)
+
+````
+
+
+````{r, echo=FALSE, out.width="40%", }
+## knitr::include_graphics("")
+````
+<br>
+<br>
+
+````{r, eval=FALSE, echo=FALSE}
+library(linpk)
+set.seed(2002)
+
+ID <- c("a", "b", "c", "d", "e")
+n=5
+meanlogCL <- log(3)
+sdlogCL <- 0.4
+CL <- rlnorm(n, meanlog = meanlogCL, sdlog = sdlogCL)
+meanlogVd <- log(29)
+sdlogVd <- 0.5
+Vd <- rlnorm(n, meanlog = meanlogVd, sdlog = sdlogVd)
+IV <- data.frame(ID=integer(0), Vd = numeric(0), CL=numeric(0)) 
+dataC <- rbind(IV, data.frame(ID = ID, Vd = Vd, CL=CL))
+dataD <- dataC
+t.obs <- seq(1, 24, 1)
+simBE<-list()
+
+for(i in c(1:nrow(dataC))){
+  dose<-data.frame(t.dose=0,amt=1000)
+  y<-pkprofile(t.obs,cl=dataC$CL[i],
+               vc=dataC$Vd[i],
+               ka=0.35,
+               dose=dose)
+  sim<-as.data.frame(y)
+  sim$ID<-dataC$ID[i]
+  simBE[[i]]<-sim 
+} 
+
+reference <-bind_rows(simBE)
+
+simBF<-list()
+for(i in c(1:nrow(dataD))){
+  dose<-data.frame(t.dose=0,amt=1000)
+  z<-pkprofile(t.obs,cl=dataD$CL[i],
+               vc=dataD$Vd[i]+0.1,
+               ka=0.41,
+               dose=dose)
+  sim<-as.data.frame(z)
+  sim$ID<-dataD$ID[i]
+  simBF[[i]]<-sim 
+} 
+
+test <-bind_rows(simBF)
+
+reference$drug <- "reference"
+test$drug <- "test"
+
+dataset_c <- rbind(reference, test)
+write.csv(dataset_c, "dataset_C.csv", row.names = FALSE)
+
+````
+
+## Data for this session
+
+"Dataset_C.csv" contains pharmacokinetic data from a crossover study. 5 participants (a-e) were given a single oral 1000 mg dose of a reference antimicrobial drug, QMP. PK measurements were taken hourly for 24 hours following this administration. Following a washout period of 2 weeks, each participant was given a single oral 1000 mg dose of a test drug, PMP, which has been developed as a potential generic alternative to QMP. 
+
+For Part 2 of the session, we will look at these data and do some basic analysis to see whether PMP (test drug) might be bioequivalent to QMP (reference drug). We will then consider what FDA/EMA requirements for bioequivalence involve.
+
+
+<br>
+
+### Task: Import and plot your data
+
+* Import your data
+
+* Plot your data
+
+You can download the data for this session directly from GitHub. Copy and paste my code.
+
+```{r ID,echo=TRUE, eval=TRUE}
+dataset_c <- read.csv("https://raw.githubusercontent.com/dlonsdal/SGUL_PK_data/refs/heads/main/pk2_param_estimate/dataset_C.csv")
+  
+``` 
+
+
+<br> 
+
+**Troubleshooting**
+
+If you have used the same <TT>ggplot2</TT> code as for previous examples, you may have ended up with a strange looking plot! This is because we have grouped by ID, but each participant has 2 sets of data (study: reference or test - referring to the reference drug or the test drug)
+<br>
+
+````{r, echo=FALSE, eval=FALSE}
+ggplot(data=dataset_c, aes(x=time, y=conc, col=ID))+
+  geom_line()+
+  geom_point()+
+  xlab("time (hours after dose)")+
+  ylab("concentration (mg/L)")+
+  labs(title="Incorrect concentration-time curve for crossover study of reference and test drugs")
+````
+
+````{r, echo=FALSE, eval = TRUE, fig.cap="Incorrect concentration-time curve for crossover study of reference and test drugs",fig.width=7,fig.height=2.5,fig.align = 'center'}
+ggplot(data=dataset_c, aes(x=time, y=conc, col=ID))+
+  geom_line()+
+  geom_point()+
+  xlab("time (hours after dose)")+
+  ylab("concentration (mg/L)")
+````
+
+<br>
+
+## Subset data
+You can use the function <TT>subset()</TT> to divide datasets into smaller groups (ie. to subset data). 
+
+For example, we can use this function to divide dataset_c into 2 datasets: 1 containing the data for the reference drug and one containing data for the test drug. We can then plot both sets of data separately. 
+
+<br>
+````{r, echo=TRUE, eval = FALSE}
+
+reference <- subset(dataset_c, drug=="reference")
+test <- subset(dataset_c, drug== "test")
+
+# Note the use of ==, this is what you need to use when using code to look for something being exactly a specific value. You need two, because it then allows for reasonable alternatives like >=
+
+````
+
+````{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE, fig.cap="Concentration-time curve for crossover study: (a). Reference drug and (b). Test drug",fig.width=7,fig.height=2.5,fig.align = 'center'}
+reference <- subset(dataset_c, drug=="reference")
+test <- subset(dataset_c, drug== "test")
+
+a <- ggplot(data=reference, aes(x=time, y=conc, col=ID))+
+  geom_line()+
+  geom_point()+
+  xlab("time (hours after dose)")+
+  ylab("concentration (mg/L)")+
+  labs(title="(a).")
+  
+b <- ggplot(data=test, aes(x=time, y=conc, col=ID))+
+  geom_line()+
+  geom_point()+
+  xlab("time (hours after dose)")+
+  ylab("concentration (mg/L)")+
+  labs(title="(b).")
+
+library(gridExtra)
+grid.arrange(a,b,ncol=2)
+````
+
+<br>
+
+## Interaction function
+
+You can also use this the <TT>interaction</TT> function in <TT>ggplot2</TT> to group by two factors in a plot. This allows us to plot dataset_c.
+
+````{r, echo=TRUE, eval=FALSE}
+ggplot(dataset_c, aes(x=time, y=conc, col=drug, shape=ID, group=interaction(ID, drug)))+
+  geom_point()+
+  geom_line()
+````
+
+````{r, echo=FALSE, eval = TRUE, fig.cap="Concentration-time curve for crossover study",fig.width=7,fig.height=2.5,fig.align = 'center'}
+
+ggplot(dataset_c, aes(x=time, y=conc, col=drug, shape=ID, group=interaction(ID, drug)))+
+  geom_point()+
+  geom_line()+
+  xlab("time (hours after dose)")+
+  ylab("concentration (mg/L)")
+
+````
+<br>
+
+## Estimations
+
+### Task: Subset data and estimate parameters
+
+* Subset the data into reference and test drug datasets if you have not already done so
+
+* Estimate Cmax and $AUC_{0-24}$ for the reference drug
+
+* Estimate Cmax and $AUC_{0-24}$ for the test drug
+
+
+<br>
+
+````{r, Echo=TRUE, Eval=TRUE}
+reference <- subset(dataset_c, drug=="reference")
+test <- subset(dataset_c, drug== "test")
+
+# REFERENCE DRUG: Cmax
+R_Cmax <- reference%>%
+  group_by(ID)%>%
+  summarise(cmax=max(conc)) %>% 
+  ungroup() %>% 
+  summarise(mean(cmax))
+
+# REFERENCE DRUG: AUC
+R_AUC <- reference %>% 
+  group_by(ID) %>% 
+  summarise(AUC=AUC(time,conc,method='trapezoid')) %>% 
+  ungroup()  %>% 
+  summarise(mAUC=
+              mean(AUC)) 
+
+# TEST DRUG: Cmax
+T_Cmax <- test%>%
+  group_by(ID)%>%
+  summarise(cmax=max(conc)) %>% 
+  ungroup() %>% 
+  summarise(mean(cmax))
+
+# TEST DRUG: AUC
+T_AUC <- test %>% 
+  group_by(ID) %>% 
+  summarise(AUC=AUC(time,conc,method='trapezoid')) %>% 
+  ungroup()  %>% 
+  summarise(mAUC=
+              mean(AUC)) 
+
+
+````
+
+<br>
+
+
+* Estimate the ratio between Cmax for the test drug and the reference drug
+
+* Estimate the ratio between AUC for the test drug and the reference drug
+
+
+````{r, echo=TRUE, eval= TRUE}
+
+# RATIO OF TEST CMAX TO REFERENCE CMAX (%)
+(T_Cmax/R_Cmax)*100
+
+# RATIO OF TEST AUC TO REFERENCE AUC (%)
+(T_AUC/R_AUC)*100
+
+````
+
+<br>
+
+What do you think of these results? 
+Do you think these drugs might be bioequivalent? 
+
+Now let's think about what developers must do to demonstrate bioequivalence. You have touched upon this during a session in PK I. 
+
+<br>
+
+
+## Estimating $AUC_{0-t}$
+
+With our estimations so far we have used the trapezoidal rule to calculate $AUC_{0-t}$. Do you remember what this means? 
+
+````{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+
+library(linpk)
+library(gridExtra)
+library(grid)
+library(ggplot2)
+library(lattice)
+
+t.obs=c(seq(0,72),1)
+cl=1.8
+vc=15
+dose<-data.frame(t.dose=0,amt=500)
+y<-pkprofile(t.obs,cl=cl,
+             vc=vc,
+             ka=0.35,
+             dose=dose)
+sim<-as.data.frame(y)
+
+plotc <- ggplot(data=sim, aes(x=time, y=conc))+
+  geom_line()+
+  xlab("Time after dose")+
+  ylab("Plasma concentration")+
+  labs(title="AUC for 0-24 hours")+
+  xlim(0, 24)+geom_ribbon(data=subset(sim,  time >=-1 & time <= 24), 
+          aes(ymin=0,ymax=conc),
+              fill='#82A146',
+              alpha=0.2, outline.type = 'full',colour='gray44')+
+  
+  geom_text(x=5, y=2.5, label="AUC 0-24", hjust= -0.25, vjust =0, size=5)
+
+plotd <- ggplot(data=sim, aes(x=time, y=conc))+
+  geom_line()+
+  xlab("Time after dose")+
+  ylab("Plasma concentration")+
+  labs(title="AUC beyond 24 hours")+
+  geom_ribbon(data=subset(sim,  time >24 & time < 72), 
+          aes(ymin=0,ymax=conc),
+              fill='#999FFC',
+              alpha=0.2, outline.type = 'full',colour='gray44')+
+  geom_text(x=33, y=1.25, label="?", hjust= -0.25, vjust =0, size=5)
+
+library(gridExtra)
+grid.arrange(plotc, plotd,ncol=2)
+
+````
+
+<br>
+
+When we estimate AUC, we estimate until our last timepoint, or $AUC_{0-t}$. This is not the same as the total drug exposure. 
+
+In sessions today we have looked at $AUC_{0-24}$ and our studies have measured upto 24 hours only. In our first plot we can see $AUC_{0-24}$ shaded in green, but additional drug exposure beyond 24 hours is shaded in lilac in the second graph. To calculate total drug exposure, we must combine the measured drug exposure and account for any further exposure beyond the last measured concentration. 
+
+This is estimated as AUC 0 to infinity, or $AUC_{0-\infty}$. 
+
+This is more advanced work that will be covered during the Advanced PK module - we hope to see you then! 
+
+<br>
+
+
+# Advanced & further work
+
+* Use '<TT>R</TT>' to produce a plot of concentration-time data displaying mean and error bars (e.g. for 95% confidence interval or standard error).  
+* Understand the FDA and EMA requirements for proving bioequivalence above the basic calculation we have performed.
+* Calculate $AUC_{0-\infty}$.
+* Advanced calculations required as evidence of bioequivalence for FDA/EMA approval.
+
+
+
+<br>
