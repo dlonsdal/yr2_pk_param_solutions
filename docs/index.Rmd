@@ -74,7 +74,7 @@ We will also learn how to estimate bioavailability using these parameters, and h
 This page is designed to provide you with notes of the session and be a handy resource when you come to revision. There are examples of code and the corresponding output from <TT>R</TT> as we go along.  
 
 ## Accessing <TT>RStudio</TT> on a University computer
-Remember, when you are using a University computer, you need to access <TT>RStudio</TT> via the University servers. The link for this is [here](https://stats3.sgul.ac.uk/rstudio). I'd suggest saving this as a "favourite" for future access. 
+Remember, when you are using a University computer, you need to access <TT>RStudio</TT> via the University servers. The link for this is [here](https://stats4.sgul.ac.uk/rstudio). I'd suggest saving this as a "favourite" for future access. 
 
 ## Setting the working directory 
 
