@@ -1,5 +1,5 @@
 ---
-title: "Pharmacokinetic Parameter Estimations using '<TT>R</TT> - Solutions'"
+title: "Pharmacokinetic Parameter Estimations using '<TT>R</TT>' - Solutions"
 output:
   bookdown::html_document2:
     fig_caption : TRUE
