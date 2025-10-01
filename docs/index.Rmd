@@ -1,9 +1,9 @@
 ---
-title: "Pharmacokinetic Parameter Estimations using '<TT>R</TT>': Solutions"
+title: "Pharmacokinetic Parameter Estimations using '<TT>R</TT> - Solutions'"
 output:
   bookdown::html_document2:
     fig_caption : TRUE
-    number_sections: no
+    number_sections: yes
     toc: yes
     toc_float: yes
 
@@ -20,6 +20,7 @@ header-includes:
   - \newcommand{\elandscape}{\end{landscape}}
 ---
 
+```{=html}
 <style>
 h1.title {
   font-size: 48px;
@@ -32,6 +33,7 @@ h4.author {
 body {
 text-align: justify}
 </style>
+```
 
 <center><img src="PK.png"/></center>
 
@@ -45,65 +47,70 @@ library(DescTools)
 #setwd("/Users/reyashah/Documents/Teaching and writing/PKII/Parameter_Estimation")
 ```
 
+# Introduction
 
-# Introduction 
+In the self-directed learning session last week, we recapped the some of the skills gained in Year 1 around quantitative pharmacology using '<TT>R</TT>'. 
 
-In the self-directed learning session last week, we recapped the some of the skills gained in Year 1 around quantitative pharmacology using '<TT>R</TT>'. In today’s workshop, we will build on this learning 
+This workshop is split into two parts. Part 1 is designed to be completed today. Part 2 is designed to be completed in a couple of weeks time at your next quantitative session. 
 
-In this session we will recap previous skills you have learnt in reading pharmacokinetic data into <TT>R</TT>, estimating PK parameters and using <TT>ggplot2</TT> to produce plots. 
+In Part 1 workshop, we will build on your learning and coding to date. We will also explore the concept of central tendency and what measures of central tendency might be useful in pharmacokinetic analysis. 
 
-We will also learn how to estimate bioavailability using these parameters, and how to save the plots you produce using <TT>ggplot2</TT>. We will recap the concept of bioequivalence and use <TT>R</TT> to perform simple calculations to assess bioequivalence.
+In part 2, we will learn how to estimate bioavailability and we will recap the concept of bioequivalence and use <TT>R</TT> to perform simple calculations to assess bioequivalence.
 
-## Learning outcomes  
- 
-* Recap use of <TT>RStudio</TT> and <TT>ggplot2</TT> to plot pharmacokinetic data, estimate pharmacokinetic parameters
-* Save plots made using <TT>ggplot2</TT>
-* Create subsets of data
-* Estimate Cmax and $AUC_{0-t}$
-* Estimate bioavailability
-* Basic estimation of bioequivalence
-* Understand the difference between arithmetic and geometric means
-* Understand the concept of $AUC_{0-\infty}$
+## Learning outcomes
+
+-   Recap use of <TT>RStudio</TT> and <TT>ggplot2</TT> to plot pharmacokinetic data, estimate pharmacokinetic parameters
+-   Save plots made using <TT>ggplot2</TT>
+-   Estimate Cmax and $AUC_{0-t}$
+-   Estimate bioavailability
+-   Basic estimation of bioequivalence
+-   Understand the difference between arithmetic and geometric means
+-   Know when to use the arithemtic mean, median and geometric mean in pharmacokinetic analysis
+-   Know how to present variability of pharmacokinetic data (% geometric coefficient of variation)
+-   Describe the concept of a drug with high inter-individual variability
+-   Understand the concept of $AUC_{0-\infty}$
 
 ## Further learning
 
-* Use '<TT>R</TT>' to produce a plot of concentration-time data displaying mean and error bars (e.g. for 95% confidence interval or standard error)
-* Understand the FDA and EMA requirements for proving bioequivalence above the basic calculation we have performed
-* Calculate $AUC_{0-\infty}$
-* Advanced calculations required as evidence of bioequivalence for FDA/EMA approval
-This page is designed to provide you with notes of the session and be a handy resource when you come to revision. There are examples of code and the corresponding output from <TT>R</TT> as we go along.  
+-   Use '<TT>R</TT>' to produce a plot of concentration-time data displaying mean and error bars (e.g. for 95% confidence interval or standard error)
+-   Understand the FDA and EMA requirements for proving bioequivalence above the basic calculation we have performed
+-   Calculate $AUC_{0-\infty}$
+-   Advanced calculations required as evidence of bioequivalence for FDA/EMA approval
+
+This page is designed to provide you with notes of the session and be a handy resource when you come to revision. There are examples of code and the corresponding output from <TT>R</TT> as we go along.
 
 ## Accessing <TT>RStudio</TT> on a University computer
-Remember, when you are using a University computer, you need to access <TT>RStudio</TT> via the University servers. The link for this is [here](https://stats4.sgul.ac.uk/rstudio). I'd suggest saving this as a "favourite" for future access. 
 
-## Setting the working directory 
+Remember, when you are using a University computer, you need to access <TT>RStudio</TT> via the University servers. The link for this is [here](https://stats4.sgul.ac.uk/rstudio). I'd suggest saving this as a "favourite" for future access.
+
+## Setting the working directory
 
 A reminder to set your working directory to the folder that your data is in using the <TT>setwd()</TT> function. You can check that you have set the working directory correctly by using the <TT>getwd()</TT> function and you can view available files by using the <TT>list.files()</TT> function.
 
-````{r, echo=TRUE, eval=FALSE}
+```{r, echo=TRUE, eval=FALSE}
 setwd("INSERT YOUR FILE PATH HERE")
 # or if on the server: 
 setwd("~/intro_pk/intro_R/")
 getwd() # check the working directory
 list.files() # view the files available in your working directory
 
-````
+```
 
 ## Packages for this session
 
-````{r, echo=TRUE, eval=FALSE}
+```{r, echo=TRUE, eval=FALSE}
 .libPaths( c( .libPaths(),
-              "/homes/dlonsdale-pharmacokinetics/sghms/bms/shares/Advanced-Pharmacokinetics/4.3.2/library") )
+              "/homes/dlonsdale-pharmacokinetics/sghms/bms/shares/Advanced-Pharmacokinetics/4.4.2/library") )
 #note that you need the '.' before 'libPaths'
 library(tidyverse)
 
-````
+```
 
 <br>
 
 # Part 1
 
-````{r, echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE}
+```{r, echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE}
 library(linpk)
 
 set.seed(2002)
@@ -173,24 +180,22 @@ ORAL_data$study <- "ORAL"
 datasetB <- ORAL_data
 write.csv(datasetB, "dataset_B.csv", row.names=FALSE)
 
-````
+```
 
 ## Data
 
-Drug X is available in oral and IV preparation. In a PK study, 5 participants (Participants A-E) were given a single dose of 500 mg Drug X intravenously, with blood samples taken every hour for PK measurements over 24 hours. 2 weeks later the same participants were given a single dose of 500 mg Drug X orally with PK measurements taken hourly for 24 hours following this. 
+Drug X is available in oral and IV preparation. In a PK study, 5 participants (Participants A-E) were given a single dose of 500 mg Drug X intravenously, with blood samples taken every hour for PK measurements over 24 hours. 2 weeks later the same participants were given a single dose of 500 mg Drug X orally with PK measurements taken hourly for 24 hours following this.
 
-Dataset_A contains the PK data for IV administration of Drug X 
-Dataset_B contains the PK data for oral administration of Drug X
+Dataset_A contains the PK data for IV administration of Drug X Dataset_B contains the PK data for oral administration of Drug X
 
 We will use these datasets for part 1 of this session. You can download the data for this session directly from GitHub. There are two files. Copy and paste my code.
 
-
-```` {r, eval=TRUE, results='hold', tidy=FALSE}
+```{r, eval=TRUE, results='hold', tidy=FALSE}
   
 dataset_A <- read.csv("https://raw.githubusercontent.com/dlonsdal/SGUL_PK_data/refs/heads/main/pk2_param_estimate/dataset_A.csv")
 dataset_B <- read.csv("https://raw.githubusercontent.com/dlonsdal/SGUL_PK_data/refs/heads/main/pk2_param_estimate/dataset_B.csv")
 
-````
+```
 
 <br>
 
@@ -198,46 +203,32 @@ dataset_B <- read.csv("https://raw.githubusercontent.com/dlonsdal/SGUL_PK_data/r
 
 ### Task: plot the IV data and save your plot
 
-* use the <TT>ggplot2</TT> package to plot the data for the IV data 
+-   use the <TT>ggplot2</TT> package to plot the data for the IV data
 
-* group by ID using colour or symbols
+-   group by ID using colour or symbols
 
-* label the x-axis and the y-axis with units (concentration is in mg/L; time is in hours)
+-   label the x-axis and the y-axis with units (concentration is in mg/L; time is in hours)
 
-* add a title to each plot
+-   add a title to each plot
 
-* use ggsave("FILENAME.JPEG") or ggsave("FILENAME.PDF") to save the plot to a jpeg or pdf file in your working directory folder
+-   use ggsave("FILENAME.JPEG") or ggsave("FILENAME.PDF") to save the plot to a jpeg or pdf file in your working directory folder
 
-* try to adjust the width and height of your saved plot. 
- 
- <br>
- 
+-   try to adjust the width and height of your saved plot.
 
-``` {r, eval=FALSE, echo=TRUE}
-ggplot(data=dataset_A, aes(x=time, y=conc, col=ID))+
-  geom_line()+
-  geom_point()+
-  xlab("time (hours after dose)")+
-  ylab("concentration (mg/L)")+
-  labs(title="Concentration-time curve for Drug X given intravenously")
+I am going to give you the solutions for this part of the task to help refresh folks memory. 
+
+```{r, warning=FALSE, message=FALSE, fig.cap="Concentration-time curve for Drug X given intravenously",fig.align = 'center'}
+ggplot(data=dataset_A, aes(x=time, y=conc, col=ID))+ #the 'col=ID' ensures we give separate colour and line for each individual
+  geom_line()+ # plots a line
+  geom_point()+ # plots the observations as datapoints
+  xlab("time (hours after dose)")+ # adds x axis label
+  ylab("concentration (mg/L)")
 
 ```
 
-<br>
-
-````{r, echo=FALSE, eval = TRUE, warning=FALSE, message=FALSE, fig.cap="Concentration-time curve for Drug X given intravenously",fig.width=7,fig.height=2.5,fig.align = 'center'}
-ggplot(data=dataset_A, aes(x=time, y=conc, col=ID))+
-  geom_line()+
-  geom_point()+
-  xlab("time (hours after dose)")+
-  ylab("concentration (mg/L)")
-
-````
-<br>
-
-````{r, echo=TRUE, eval=FALSE}
+```{r,  eval=FALSE}
 # save as JPEG specifying width
-ggsave("IV_data_small.jpeg", width=2)
+ggsave("IV_data_small.jpeg", width=2) #note that standard units are 'inches' in R
 ggsave("IV_data_large.jpeg", width= 12)
 
 # go to your working directory and look at these two files. Is one more useful than the other? 
@@ -246,16 +237,15 @@ ggsave("IV_data_large.jpeg", width= 12)
 # a vector graphic can be resized, reshaped or rescaled without losing image quality 
 ggsave("IV_data.PDF")
 
-````
+```
+
 <br>
 
 ### Task: plot the oral data and save your plot
 
-Repeat the task above for the oral dataset
-
 <br>
 
-````{r, echo=TRUE, eval=FALSE}
+```{r, echo=TRUE, eval=FALSE}
 ggplot(data=dataset_B, aes(x=time, y=conc, col=ID))+
   geom_line()+
   geom_point()+
@@ -264,22 +254,22 @@ ggplot(data=dataset_B, aes(x=time, y=conc, col=ID))+
   labs(title="Concentration-time curve for Drug X given orally")
 
 ggsave("oral_data.pdf")
-````
+```
 
-````{r, echo=FALSE, eval = TRUE, fig.cap="Concentration-time curve for Drug X given orally",fig.width=7,fig.height=2.5,fig.align = 'center'}
+```{r, echo=FALSE, eval = TRUE, fig.cap="Concentration-time curve for Drug X given orally",fig.width=7,fig.height=2.5,fig.align = 'center'}
 ggplot(data=dataset_B, aes(x=time, y=conc, col=ID))+
   geom_line()+
   geom_point()+
   xlab("time (hours after dose)")+
   ylab("concentration (mg/L)")
 
-````
-<br>
+```
 
-## Plotting data together
-You can use '<TT>R</TT>' to present your data in different ways. Here, we have combined dataset_A and dataset_B to display a summary of our data for Drug X. 
+```{r, echo=FALSE, eval=FALSE, fig.cap="Mean drug concentration-time curve for oral and IV Drug X with 95% confidence interval", fig.width=7, fig.height=3, fig.align='center', message=FALSE, warning=FALSE}
 
-````{r, echo=FALSE, eval=TRUE, fig.cap="Mean drug concentration-time curve for oral and IV Drug X with 95% confidence interval", fig.width=7, fig.height=3, fig.align='center', message=FALSE, warning=FALSE}
+# Plotting data together
+# You can use ‘R’ to present your data in different ways. Here, we have combined dataset_A and dataset_B to display a summary of our data for Drug X.
+
 dataset_D <- rbind(dataset_A, dataset_B)
 
 overall <- dataset_D %>% 
@@ -307,32 +297,32 @@ ggplot(overall, aes(x=time, y=MeanConc,colour=study,group=study)) +
         legend.position=c(1,1),
         legend.background = element_rect(fill='transparent') )
 
-````
+```
 
 ## Estimating pharmacokinetic parameters
 
-### Task: calculate Cmax
+### Task: Esimate $C_{max}$
 
-* Estimate the Cmax for each participant for the IV and the oral data
-* Estimate the mean Cmax for the IV data and the oral data
+-   Estimate the $C_{max}$ for each participant for the IV and the oral data
+
+-   Estimate the mean $C_{max}$ for the IV data and the oral data
 
 **Reminder about piping**
 
-Piping is a tool that allows us to undertake multiple logical steps to achieve a desired output in our text using "<TT>%>%</TT>" between steps. Technically, <TT>%>%</TT> is found in the <TT>magrittr()</TT> package, but when you load <TT>tidyverse()</TT> , <TT>magrittr()</TT> is automatically loaded.  
+Piping is a tool that allows us to undertake multiple logical steps to achieve a desired output in our text using "<TT>%\>%</TT>" between steps. Technically, <TT>%\>%</TT> is found in the <TT>magrittr()</TT> package, but when you load <TT>tidyverse()</TT> , <TT>magrittr()</TT> is automatically loaded.
 
+I am going to give you the code for the IV dataset. See if you can edit this to give a value for the oral dataset.
 
-```{r, echo=TRUE, eval=TRUE}
+```{r}
 
-# remember to load the tidyverse package if you have not already
-# below, we tell R to take 'dataset_A', group by 'ID' then give the cmax
+# remember to load the tidyverse package if you have not already 
+library(tidyverse)
+# below, we tell R to take 'dataset_A' (the IV data), group by 'ID' then give the cmax
 dataset_A%>%
   group_by(ID)%>%
   summarise(cmax=max(conc))
 
-# here we tell R to take 'dataset_B', group by 'ID' then give the cmax
-dataset_B%>%
-  group_by(ID)%>%
-  summarise(cmax=max(conc))
+
 
 
 # here we tell R to take 'dataset_A', and give the Cmax for each ID
@@ -343,6 +333,13 @@ dataset_A%>%
   ungroup() %>% 
   summarise(mean(cmax))
 
+```
+
+```{r}
+# here we tell R to take 'dataset_B', group by 'ID' then give the cmax
+dataset_B%>%
+  group_by(ID)%>%
+  summarise(cmax=max(conc))
 
 # here we tell R to take 'dataset_B', and give the Cmax for each ID
 # and then summarise the mean of these values - thus the output is the mean cmax
@@ -355,17 +352,15 @@ dataset_B%>%
 
 ```
 
-<br>
-
 ### Task: Estimate $AUC_{0-24}$
 
-* Estimate the $AUC_{0-24}$ for each participant for the IV and the oral data
+-   Estimate the $AUC_{0-24}$ for each participant for the IV and the oral data
 
-* Estimate the mean $AUC_{0-24}$ for the IV data and the oral data
+-   Estimate the mean $AUC_{0-24}$ for the IV data and the oral data
 
-<br>
+Again, I will give you a solution for the IV data. 
 
-```{r, echo=TRUE, eval=TRUE}
+```{r}
 
 library(DescTools)
 # loading this allows us to use the trapezoid function
@@ -375,10 +370,6 @@ dataset_A%>%
   group_by(ID) %>% 
   summarise(AUC=AUC(time,conc,method='trapezoid'))
 
-# here we tell R to take 'dataset_B', group by 'ID' then calculate the AUC
-dataset_B%>%
-  group_by(ID) %>% 
-  summarise(AUC=AUC(time,conc,method='trapezoid'))
 
 
 # here we tell R to take 'dataset_A', and calculate the AUC for each ID
@@ -389,6 +380,15 @@ dataset_A %>%
   ungroup()  %>% 
   summarise(mAUC=
               mean(AUC)) 
+
+```
+
+```{r}
+
+# here we tell R to take 'dataset_B', group by 'ID' then calculate the AUC
+dataset_B%>%
+  group_by(ID) %>% 
+  summarise(AUC=AUC(time,conc,method='trapezoid'))
 
 
 # here we tell R to take 'dataset_B', and do the same, to give the mean AUC
@@ -402,16 +402,629 @@ dataset_B %>%
 
 ```
 
+## Arithimetic and Geometric mean
+
+### Arithmetic mean
+
+With the code we have used in the course so far, we are calculating the arithmetic mean. The arithmetic mean is often colloquially referred to as "*the* mean" or "*the* average". It is frequently the only type of "mean" that people are aware of. It is a useful tool for summarising a set of data into one value, somewhere in the middle (the central tendency). It is a fairly intuitive calculation that we often don't really take much time thinking about. It incorporates all data points (unlike the median or the mode). When looking at a large sample from a normally distributed population, the sample mean ($\bar{x}$) is considered an unbiased estimator of the population mean ($\mu$).
+
+The formula for the arithmetic mean ($\mu$) is $$\mu = \frac{\sum_{i=1}^{N} x_i}{N}$$
+
+Where: 
+
+* $x_i$ are the data points of each individual 
+* $N$ is the number of data points in the whole population 
+* $i$ can therefore take a value from $1$ to $N$ ($x_1$ is the value from the first individual, $x_2$ from the second etc)
+
+The formula for arithmetic mean from a sample is often given a different symbol ($\bar{x}$). The equation is the same:
+
+$$\bar{x} = \frac{\sum_{i=1}^{n} x_i}{n}$$
+
+Where:
+
+* $\bar{x}$ is the sample mean. 
+* $x_i$ are the individual data points in the sample. 
+* $n$ is the sample size (the number of data points in the sample)
+
+For example, if we have the set of numbers $\{5, 8, 11, 15, 21\}$, the arithmetic mean ($\mu$) is calculated as:
+
+$$\bar{x} = \frac{5 + 8 + 11 + 15 + 21}{5} = \frac{60}{5} = 12$$ However, the mean is not always the preferred measure of central tendency. Its most significant limitation is its sensitivity to extreme values (outliers) and/or data that is skewed/asymetrical in distribution. For example if we replace $21$ with $100$ in the above set, the mean is heavily influenced by the $100$ outlier.
+
+$$\bar{x} = \frac{5 + 8 + 11 + 15 + 100}{5} = \frac{139}{5} = 27.8$$ In this scenario you might choose to use the median to estimate the central tendency of these data $$\text{median}=11$$ Let's look at an example with some pharmacokinetic data.
+
+#### Arithmetic mean is a poor estimate of central tendency in skewed data
+
+In Figure \@ref(fig:clearance-plot-calculated-no-gm), amoxicillin clearance from 10000 patients is plotted. You can see that the data is right skewed. From what we know about the pharmacological principles behind pharmacokinetic parameters, this should be intuitive - you cannot have a negative clearance and so the plot will naturally have some grouping around low clearance values and a long tail toward higher clearance values to the right.
+
+The plot shows how this right skew pulls the arithmetic mean to the right. Relying on this figure to describe pharmacokinetic data will give a falsely high impression of the population value of clearance.
+
+```{r clearance-plot-calculated-no-gm, fig.width=9, fig.height=6, warning=FALSE, message=FALSE, echo=FALSE, fig.cap="Distribution of simulated amoxicillin clearance (CL), illustrating the right-skew typical of pharmacokinetic parameters and the divergence between the arithmetic mean (AM) and median."}
+# Load necessary libraries
+library(ggplot2)
+
+# --- 1. GENERATE SYNTHETIC LOG-NORMAL DATA (Using Literature-Based Estimates) ---
+set.seed(42) # For reproducibility
+N <- 10000   # Final Sample size
+
+# Literature-Derived Parameters 
+mu_log <- 2.61   
+sigma_log <- 0.36 
+
+# Generate log-normal clearance values (Clearance in L/hr)
+Clearance_L_hr <- rlnorm(N, meanlog = mu_log, sdlog = sigma_log)
+
+# --- 2. CALCULATE CENTRAL TENDENCY DIRECTLY FROM THE SAMPLE DATA ---
+# Arithmetic Mean: Calculated from the sample data
+AM_CL <- mean(Clearance_L_hr)
+
+# Median: Calculated from the sample data
+Median_CL <- median(Clearance_L_hr) 
+
+# Create a data frame for ggplot
+pk_data <- data.frame(CL = Clearance_L_hr)
+
+
+# --- 3. CREATE THE GGPLOT VISUALIZATION (CVD-Friendly Colors) ---
+
+# Define the CVD-friendly colors (GM is excluded)
+CVD_PALETTE <- c("Arithmetic mean (AM)" = "#D55E00", 
+                 "Median" = "#0072B2")                 
+
+ggplot(pk_data, aes(x = CL)) +
+  # Histogram
+  geom_histogram(aes(y = after_stat(density)),
+                 bins = 30,
+                 fill = "#56B4E9", 
+                 color = "white") +
+
+  # Add Vertical Lines for Central Tendency - ENSURING REDUNDANT CODING (LINETYPE)
+  
+  # Arithmetic Mean (AM)
+  geom_vline(aes(xintercept = AM_CL, color = "Arithmetic mean (AM)"),
+             linewidth = 1.5,
+             linetype = "dotted") + 
+
+  # Median
+  geom_vline(aes(xintercept = Median_CL, color = "Median"),
+             linewidth = 1.5,
+             linetype = "dashed") + 
+
+  # Customize Labels and Title (Sentence Case applied, Subtitle reinstated)
+  labs(       subtitle = paste0("AM = ", round(AM_CL, 2), " L/hr, Median = ", round(Median_CL, 2), " L/hr"),
+       x = "Clearance (L/hr)",
+       y = "Density") +
+
+  # Customize the Legend and Theme (Sentence Case applied)
+  scale_color_manual(name = "Central tendency",
+                     values = CVD_PALETTE) +
+  
+  xlim(0, max(Clearance_L_hr) * 1.05) + 
+  theme_minimal(base_size = 14) +
+  theme(legend.position = c(0.85, 0.75),
+        plot.title = element_text(face = "bold"))
+```
+
+#### So I should just use median, right?
+
+You *could* just use sample median. This value is well recognised and understood. It does have limitations however. For example, as a non-parametric statistic it is less straightforward to use to make inferences from the data - we cannot easily undertake a t-test or derive confidence intervals for a population median. We are also not usually *just* interested in the central tendency. We are also interested in variability between individuals and this is less easily described when using median.
+
+### Geometric mean
+
+Statisticians *love* to be able to generalise. It allows them to use a set of standard calculations and apply them to different data sets that share similar properties.
+
+For example, if you look at a plot of amoxicillin clearance next to a plot of amoxicillin volume of distribution (top panels Figure \@ref(fig:pk-distributions)), you can see that although they are *different* pharmacokinetic parameters, the shape of the plots (the distribution) is *similar*. These parameters are often (_approximately_) 'log-normally' distributed. This means that if you take the logarithm of the data, the distribution is transformed to a 'normal' distribution. This is shown in bottom panels of the plot. You can see that the median and arithmetic mean of the log transformed data converge.
+
+```{r pk-distributions, fig.width=12, fig.height=8, warning=FALSE, message=FALSE, echo=FALSE, fig.cap="Figure 1: Comparison of amoxicillin pharmacokinetic parameters (CL and V) on the linear and log-transformed scales. The linear scale shows a right-skewed (log-normal) distribution, causing the arithmetic mean (AM) and median to diverge. The log-transformed scale demonstrates a symmetrical (normal) distribution, where the arithmetic mean (equivalent to the geometric mean on the linear scale) and median converge."}
+# Load necessary libraries
+library(ggplot2)
+library(patchwork) 
+
+# --- 1. GENERATE SYNTHETIC LOG-NORMAL DATA (Using Literature-Based Estimates) ---
+set.seed(42) # For reproducibility
+N <- 10000   # Sample size
+
+# Parameters for Clearance (CL) 
+mu_log_CL <- 2.61   # ln(GM_CL)
+sigma_log_CL <- 0.36 # ln(GSD_CL)
+
+# Parameters for Volume of Distribution (V) 
+mu_log_V <- 2.98   # ln(GM_V)
+sigma_log_V <- 0.30 
+
+# Generate data (Original Linear Scale)
+Clearance_L_hr <- rlnorm(N, meanlog = mu_log_CL, sdlog = sigma_log_CL)
+Volume_L <- rlnorm(N, meanlog = mu_log_V, sdlog = sigma_log_V)
+
+# Generate data (Log Scale)
+Log_CL <- log(Clearance_L_hr)
+Log_V <- log(Volume_L)
+
+
+# --- 2. CALCULATE CENTRAL TENDENCY FOR ALL SCALES ---
+
+# Linear Scale
+AM_CL <- mean(Clearance_L_hr)
+Median_CL <- median(Clearance_L_hr) 
+AM_V <- mean(Volume_L)
+Median_V <- median(Volume_L)
+
+# Log Scale (AM on the log scale is the most important value)
+AM_Log_CL <- mean(Log_CL) # This equals mu_log_CL
+Median_Log_CL <- median(Log_CL)
+AM_Log_V <- mean(Log_V)
+Median_Log_V <- median(Log_V)
+
+
+# --- 3. DEFINE COLORS AND PLOT OBJECTS ---
+
+# Define the CVD-friendly colors
+CVD_PALETTE <- c("Arithmetic mean (AM)" = "#D55E00", 
+                 "Median" = "#0072B2")                
+
+# --- PLOT 1: CL Linear Scale (Skewed) ---
+plot_CL_linear <- ggplot(data.frame(CL = Clearance_L_hr), aes(x = CL)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30,
+                 fill = "#56B4E9", color = "white") +
+  geom_vline(aes(xintercept = AM_CL, color = "Arithmetic mean (AM)"), 
+             linewidth = 1.5, linetype = "dotted") + 
+  geom_vline(aes(xintercept = Median_CL, color = "Median"), 
+             linewidth = 1.5, linetype = "dashed") + 
+  labs(title = "Clearance (CL) - Linear scale",
+       subtitle = paste0("AM = ", round(AM_CL, 2), " L/hr, Median = ", round(Median_CL, 2), " L/hr"),
+       x = "Clearance (L/hr)",
+       y = "Density") +
+  scale_color_manual(name = "Central tendency", values = CVD_PALETTE) + 
+  xlim(0, max(Clearance_L_hr) * 1.05) + 
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none", plot.title = element_text(face = "bold"))
+
+# --- PLOT 2: V Linear Scale (Skewed) ---
+plot_V_linear <- ggplot(data.frame(V = Volume_L), aes(x = V)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30,
+                 fill = "#56B4E9", color = "white") +
+  geom_vline(aes(xintercept = AM_V, color = "Arithmetic mean (AM)"), 
+             linewidth = 1.5, linetype = "dotted") + 
+  geom_vline(aes(xintercept = Median_V, color = "Median"), 
+             linewidth = 1.5, linetype = "dashed") + 
+  labs(title = "Volume of distribution (V) - Linear scale",
+       subtitle = paste0("AM = ", round(AM_V, 2), " L, Median = ", round(Median_V, 2), " L"),
+       x = "Volume of distribution (L)",
+       y = "") + 
+  scale_color_manual(name = "Central tendency", values = CVD_PALETTE) + 
+  xlim(0, max(Volume_L) * 1.05) + 
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none", plot.title = element_text(face = "bold"))
+
+# --- PLOT 3: CL Log Scale (Normal) ---
+plot_CL_log <- ggplot(data.frame(Log_CL = Log_CL), aes(x = Log_CL)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30,
+                 fill = "#56B4E9", color = "white") +
+  geom_vline(aes(xintercept = AM_Log_CL, color = "Arithmetic mean (AM)"), 
+             linewidth = 1.5, linetype = "dotted") + 
+  geom_vline(aes(xintercept = Median_Log_CL, color = "Median"), 
+             linewidth = 1.5, linetype = "dashed") + 
+  labs(title = "Clearance (CL) - Log scale",
+       subtitle = paste0("AM(ln) = ", round(AM_Log_CL, 2), ", Median(ln) = ", round(Median_Log_CL, 2)),
+       x = "Natural log of Clearance (ln(L/hr))",
+       y = "Density") +
+  scale_color_manual(name = "Central tendency", values = CVD_PALETTE) + 
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none", plot.title = element_text(face = "bold"))
+
+# --- PLOT 4: V Log Scale (Normal) ---
+plot_V_log <- ggplot(data.frame(Log_V = Log_V), aes(x = Log_V)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30,
+                 fill = "#56B4E9", color = "white") +
+  geom_vline(aes(xintercept = AM_Log_V, color = "Arithmetic mean (AM)"), 
+             linewidth = 1.5, linetype = "dotted") + 
+  geom_vline(aes(xintercept = Median_Log_V, color = "Median"), 
+             linewidth = 1.5, linetype = "dashed") + 
+  labs(title = "Volume of distribution (V) - Log scale",
+       subtitle = paste0("AM(ln) = ", round(AM_Log_V, 2), ", Median(ln) = ", round(Median_Log_V, 2)),
+       x = "Natural log of Volume (ln(L))",
+       y = "") + 
+  scale_color_manual(name = "Central tendency", values = CVD_PALETTE) + 
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none", plot.title = element_text(face = "bold"))
+
+
+# --- 4. COMBINE PLOTS IN A 2x2 GRID WITH A SHARED LEGEND ---
+combined_plot <- (plot_CL_linear + plot_V_linear) / 
+                 (plot_CL_log + plot_V_log) +
+  plot_layout(guides = "collect") & 
+  theme(legend.position = "bottom")
+
+combined_plot
+```
+
+The fact that the arithmetic mean after undergoing log-transformation _is_ a useful measure of central tendency of the log-transformed data is useful to us! You can transform this result back into the standard domain. This measure of central tendency is then known as the *geometric mean* of the data. The equation to calculate the geometric mean is $$\text{GM} = \exp\left( \frac{1}{n} \sum_{i=1}^{n} \ln(x_i) \right)$$
+
+Where:
+
+* $x_i$ is the $i$-th observed value in the dataset.
+* $n$ is the total number of observations (the sample size).
+* $\ln(x_i)$ is the natural logarithm of the observation.
+* $\sum_{i=1}^{n}$ is the summation notation.
+* $\exp(\dots)$ is the exponential function (anti-logarithm).
+
+If you hate using log transformations, it can also be calculated as follows:
+
+$$\text{GM} = \left( \prod_{i=1}^{n} x_i \right)^{1/n}$$
+
+Where:
+
+* $x_i$ is the $i$-th observed value in the dataset.
+* $n$ is the total number of observations (the sample size).
+* $\prod_{i=1}^{n} x_i$ is the product of all $x_i$ values ($x_1 \times x_2 \times x_3 \cdot \dots \times x_n$).
+
+Figure \@ref(fig:clearance-plot-calculated-gm) shows median, geometric and arithmetic means displayed. 
+
+```{r clearance-plot-calculated-gm, fig.width=9, fig.height=6, warning=FALSE, message=FALSE, echo=FALSE, fig.cap="Figure 1: Distribution of simulated amoxicillin clearance (CL), illustrating the right-skew typical of pharmacokinetic parameters and the central measures of geometric mean (GM), arithmetic mean (AM), and median."}
+# Load necessary libraries
+library(ggplot2)
+
+# --- 1. GENERATE SYNTHETIC LOG-NORMAL DATA (Using Literature-Based Estimates) ---
+set.seed(42) # For reproducibility
+N <- 10000   # Final Sample size
+
+# Literature-Derived Parameters 
+mu_log <- 2.61   
+sigma_log <- 0.36 
+
+# Generate log-normal clearance values (Clearance in L/hr)
+Clearance_L_hr <- rlnorm(N, meanlog = mu_log, sdlog = sigma_log)
+
+# --- 2. CALCULATE CENTRAL TENDENCY DIRECTLY FROM THE SAMPLE DATA ---
+# Geometric Mean: Calculated from the sample data
+GM_CL <- exp(mean(log(Clearance_L_hr)))
+
+# Arithmetic Mean: Calculated from the sample data
+AM_CL <- mean(Clearance_L_hr)
+
+# Median: Calculated from the sample data
+Median_CL <- median(Clearance_L_hr) 
+
+# Create a data frame for ggplot
+pk_data <- data.frame(CL = Clearance_L_hr)
+
+
+# --- 3. CREATE THE GGPLOT VISUALIZATION (CVD-Friendly Colors) ---
+
+# Define the CVD-friendly colors (Labels are in Sentence Case)
+CVD_PALETTE <- c("Geometric mean (GM)" = "#D55E00",     # Dark Orange/Amber
+                 "Arithmetic mean (AM)" = "#000000",    # Black
+                 "Median" = "#0072B2")                 # Blue
+
+ggplot(pk_data, aes(x = CL)) +
+  # Histogram
+  geom_histogram(aes(y = after_stat(density)),
+                 bins = 30,
+                 fill = "#56B4E9", 
+                 color = "white") +
+
+  # Add Vertical Lines for Central Tendency - ENSURING REDUNDANT CODING (LINETYPE)
+  geom_vline(aes(xintercept = GM_CL, color = "Geometric mean (GM)"),
+             linewidth = 1.5,      
+             linetype = "solid") + 
+
+  geom_vline(aes(xintercept = AM_CL, color = "Arithmetic mean (AM)"),
+             linewidth = 1.5,
+             linetype = "dotted") + 
+
+  geom_vline(aes(xintercept = Median_CL, color = "Median"),
+             linewidth = 1.5,
+             linetype = "dashed") + 
+
+  # Customize Labels and Title (Sentence Case applied, Subtitle with values)
+  labs(
+       subtitle = paste0("GM = ", round(GM_CL, 2), " L/hr, AM = ", round(AM_CL, 2), " L/hr, Median = ", round(Median_CL, 2), " L/hr"),
+       x = "Clearance (L/hr)",
+       y = "Density") +
+
+  # Customize the Legend and Theme (Sentence Case applied)
+  scale_color_manual(name = "Central tendency",
+                     values = CVD_PALETTE) +
+  
+  xlim(0, max(Clearance_L_hr) * 1.05) + 
+  theme_minimal(base_size = 14) +
+  theme(legend.position = c(0.85, 0.75),
+        plot.title = element_text(face = "bold"))
+
+```
+
+#### Exemplar with our small skewed dataset
+
+If we go back to our small skewed dataset sample {5, 8, 11, 15, 100}. The Geometric mean is calculated as follows:  $$\text{GM} = \exp\left(\frac{\ln(5) + \ln(8) + \ln(11) + \ln(15) + \ln(100)}{5}\right)\approx 14.59$$
+Table \@ref(tab:comparison-table) compares arithmetic mean, geometric mean and median from this dataset. 
+
+```{r comparison-table, results='asis', echo=FALSE}
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(tibble)
+
+# Data for the example (using actual calculated values)
+numbers_outlier <- c(5, 8, 11, 15, 100)
+sum_outlier <- sum(numbers_outlier)
+log_values <- log(numbers_outlier)
+sum_log <- sum(log_values)
+mean_log <- sum_log / length(numbers_outlier)
+gm_result <- exp(mean_log)
+
+# Create data for the comparison table
+comparison_data <- tribble(
+  ~Statistic, ~`Formula / Calculation`, ~Result, ~Interpretation,
+  "Arithmetic Mean ($\\bar{x}$)", "$\\frac{\\sum x_i}{n}$", paste0("$\\frac{", sum_outlier, "}{5} = 27.8$"), "Heavily influenced by the outlier, $\\mathbf{100}$.",
+  "Median", "The middle value when sorted", "$5, 8, \\mathbf{11}, 15, 100$", "Robustly estimates the center, ignoring the magnitude of the outlier.",
+  # NOTE: Removed \mathbf{} around the 14.59 result here
+  "Geometric Mean (GM)", "$\\exp\\left(\\frac{\\sum \\ln(x_i)}{n}\\right)$", paste0("$\\exp\\left(\\frac{", round(sum_log, 2), "}{5}\\right) \\approx \\exp(", round(mean_log, 2), ") \\approx 14.59$"), "Less influenced than the arithmetic mean, reflecting the central tendency of the ratios."
+)
+
+# Render the comparison table
+comparison_data %>%
+  kbl(
+    caption = "Comparison of Central Tendency Measures for Data Set \\{5, 8, 11, 15, 100\\}",
+    booktabs = TRUE,
+    align = 'lccc',
+    escape = FALSE
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"), 
+    full_width = FALSE
+  )
+
+```
+
+### Describing variability in log-normally distributed data
+
+#### Sample (arithmetic) standard deviation
+You will be used to describing variability associated with arithmetic mean. This is useful because it provides some description of the spread of the data, alongside its central tendency. Typically the statistic you will have used is the standard deviation. You will often see sample mean and sample standard deviation used as estimates for population values. For example, the mean weight from a sample of schoolchildren alongside sample standard deviation provides an estimate for the population mean and population standard deviation of _all_ school children. Sample standard deviation is calculated as follows: $$s = \sqrt{\frac{\sum_{i=1}^{n} (x_i - \bar{x})^2}{n-1}}$$
+
+Where:
+
+* $s$ is the **sample standard deviation** (often labelled $\text{SD}$).
+* $x_i$ is the $i$-th observed value in the sample.
+* $\bar{x}$ is the **arithmetic mean** of the sample.
+* $n$ is the **sample size**.
+* $n-1$ is the **degrees of freedom**, used to ensure $s$ is an unbiased estimate of the population standard deviation
+
+It is important to note that arithmetic standard deviation is symmetrical around the mean. Values are often reported with a +/- e.g.Mean weight $60 \text{ kg} \pm 2 \text{ kg} \ (\text{SD})$. You would expect the same number of people to have a weight of 62 kg as you would for 58 kg. 
+
+#### Geometric standard deviation and coefficient of variation (%CV)
+
+The problem with log-normally distributed data is that a 'standard' arithmetic standard deviation will often over-estimate the spread of data _and_, as the data is not symmetrical, will contain different amounts of data on either side of the mean. 
+
+The solution is back in the log-domain. If we log-transform the data we have normally distributed data again and so can calculate our usual variability measure. $$s_{\ln} = \sqrt{\frac{\sum_{i=1}^{n} (\ln(x_i) - \overline{\ln(x)})^2}{n-1}}$$
+
+Where:
+
+* $s_{\ln}$ is the **sample standard deviation of the log transformed data**.
+* $\ln(x_i)$ is the **natural logarithm** of the $i$-th observed value.
+* $\overline{\ln(x)}$ is the **arithmetic mean of the log-transformed data**.
+* $n$ is the **sample size**.
+* $n-1$ are the **degrees of freedom** (the unbiased denominator for sample variance).
+
+Then, a bit like with the geometric mean, we can calculate our geometric standard deviation by converting back into the standard domain $$\text{GSD} = \exp(s_{\ln})$$
+
+Where:
+
+* $\text{GSD}$ is the **Geometric Sample Standard Deviation**.
+* $\exp(\dots)$ is the **exponential function** (or anti-logarithm, $e^{(\dots)}$).
+* $s_{\ln}$ is the **sample standard deviation of the natural logarithm of the data** 
+
+Finally, because geometric standard deviation is not all that intuitive a number (and it can't be expressed as a $\pm$). Variability in pharmacokinetic data is often presented as a percentage geometric coefficient of variability (often shortened to $%CV%$). This is calcluated as follows:
+
+$$\%\text{GCV} = \sqrt{\exp(s_{\ln}^2) - 1} \times 100$$
+
+Where:
+
+* $\%\text{GCV}$ is the **Geometric Coefficient of Variation** (expressed as a percentage).
+* $\exp(\dots)$ is the **exponential function** (or anti-logarithm).
+* $s_{\ln}^2$ is the **sample variance of the natural log transformed data** (the square of $s_{\ln}$, calculated using the $n-1$ denominator)
+
+## tl;dr;tmm 
+(too long; didn't read; too much maths)
+
+I appreciate that for some that will have been too much mathematics. To preempt the obvious question - no, I do not expect you to know and regurgitate the above calculations in an exam. The detail is provided to aid your understanding. Here is a bare bones summary: 
+
+_Many_ pharmacokinetic parameters are _not_ normally distributed. You should _not_ use standard descriptive statistics like sample arithmetic mean and sample arithmetic standard deviation as estimates for true population values in these cases. 
+
+Instead we can use geometric mean and geometric coefficient of variation. These statistics are useful for right skewed (log-normally distributed) data. 
+
+```{r shaded-table, results='asis', echo=FALSE}
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+# Create the data frame - Corrected to use standard math notation without LaTeX escaping
+# NOTE: The double backslashes for the math (\bar{x}) MUST remain inside the string
+data <- tribble(
+  ~Measure, ~`Central Tendency`, ~`Variability Measure`, ~`Formula for Variability`, ~`Appropriate for`,
+  "Arithmetic", "Arithmetic Mean ($\\bar{x}$ or $\\text{AM}$)", "$\\text{%CV}$", "$\\left( \\frac{s}{\\bar{x}} \\right) \\times 100$", "$\\text{Normal}$ (Symmetrical) Data",
+  "Geometric", "Geometric Mean ($\\text{GM}$)", "$\\text{%GCV}$", "$\\sqrt{\\exp(s_{\\ln}^2) - 1} \\times 100$", "$\\text{Log-Normal}$ (Skewed) Data"
+)
+
+# Render the kable table with shading and alignment for HTML
+data %>%
+  kbl(
+    caption = "Comparison of arithmetic and geometric summary measures",
+    booktabs = TRUE,
+    align = 'l'
+  ) %>%
+  # Apply HTML styling for the header row and hover effect
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"), 
+    full_width = F
+  ) %>% 
+  # Set the background color for the header row
+  row_spec(0, background = "#D5D5D5", bold = T)
+```
+
+```{r both-variability-table-sd-range, results='asis', echo=FALSE}
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(tibble)
+
+# Create the data frame - Updated Interpretation column for both SD examples
+data_both_variability_final <- tribble(
+  ~Measure, ~`Statistical Parameter`, ~`Value Type`, ~`Interpretation`,
+  # --- ARITHMETIC MEASURES ---
+  "arithmetic", "standard deviation (SD)", "unit of measure", "absolute measure of spread. the $68\\%$ range is $\\text{AM} \\pm 1 \\cdot \\text{SD}$ (additive).",
+  "arithmetic", "coefficient of variation (%CV)", "percentage ($\\text{%}$)", "relative measure of spread around the AM. used for normally distributed data.",
+  # --- GEOMETRIC MEASURES ---
+  "geometric", "geometric standard deviation (GSD)", "factor (unitless, $\\text{>}1$)", "the multiplicative factor of spread. the $68\\%$ range is $\\text{GM}/\\text{GSD}$ to $\\text{GM} \\times \\text{GSD}$ (multiplicative).",
+  "geometric", "geometric coefficient of variation (%GCV)", "percentage ($\\text{%}$)", "relative symmetrical scatter around the geometric mean (GM). preferred for log-normal data."
+)
+
+# Render the kable table with styling for HTML
+data_both_variability_final %>%
+  kbl(
+    caption = "comparison of arithmetic and geometric variability measures",
+    booktabs = TRUE,
+    align = 'lccc',
+    col.names = c("domain", "statistical parameter", "value type", "interpretation"),
+    escape = FALSE # Crucial for rendering LaTeX math
+  ) %>%
+  # Group the rows by the 'Measure' column
+  pack_rows("arithmetic measures", 1, 2) %>%
+  pack_rows("geometric measures", 3, 4) %>%
+  # Use HTML styling (Bootstrap)
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"), 
+    full_width = FALSE
+  ) %>% 
+  # Set the background color for the header row
+  row_spec(0, background = "#D5D5D5", bold = FALSE) %>%
+  # Add a footer to define acronyms
+  footnote(
+    general = "AM = arithmetic mean; SD = standard deviation; %CV = percent coefficient of variation; GM = geometric mean; GSD = geometric standard deviation; %GCV = percent geometric coefficient of variation. Note: $\\pm 1 \\cdot \\text{SD}$ typically encompasses approximately $68\\%$ of data points in a normal distribution.", 
+    footnote_as_chunk = TRUE
+  )
+```
 <br>
 
-## Are we using the correct mean? 
-With this code, we are calculating the arithmetic mean. The arithmetic mean is often referred to as "the mean" and relates to the sum of values. It is prone to being affected by outliers or skewed data. It is most accurate when data is not skewed and the values are independent of one another. **The arithmetic mean will always overestimate values for pharmacokinetic data**.
+### Is there a definition of a 'high' amount of variability in pharmacokinetics? 
 
-**The geometric mean is most accurate for pharmacokinetic data**. This relates to the product of values rather than their sum. It is less affected by outliers and is more appropriate for use with skewed data or growth rates. It is calculated by multiplying _n_ numbers together and then finding the _nth_ root.
-
-We will continue using the arithmetic mean for this session, but be aware of its limitations. If you join us for the Advanced PK course, we will learn how to estimate PK parameters using the geometric mean. 
+Yes. The FDA considers a %GCV of 30% or higher in $C_{max}$ or $AUC_{0-\infty}$ to represent high inter-individual variability. This means that the drug exposure is considered to be highly variable between individuals. 
 
 <br>
+
+### OK so it is geometric for all......!
+
+Erm. No. Sorry. Somewhat irritatingly you cannot use this principle for all of the pharmacokinetic parameters. 
+
+Here is an example:
+
+$T_{max}$, the time to maximum concentration is _highly_ dependent upon the sampling schedule and can _only_ take the discrete values of the times samples were taken. For example, if you _only_ take samples at 0.25, 0.5, 1 and 1.25 hours then $T_{max}$ can only be one of these. So for $T_{max}$ we report median and range (min-max). Sorry.
+
+```{r pk-regulatory-table-subscript, results='asis',echo=FALSE}
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+# Create the data frame, ensuring 'max' is subscripted (e.g., T$_{max}$)
+pk_summary <- tribble(
+  ~`PK Parameter`, ~`Distribution Type`, ~`Preferred Central Tendency`, ~`Preferred Variability Measure`,
+  "Area Under the Curve (AUC)", "Log-Normal (Skewed)", "$\\text{Geometric Mean (GM)}$", "$\\text{Geometric CV (%GCV)}$",
+  "Maximum Concentration (C$_{max}$)", "Log-Normal (Skewed)", "$\\text{Geometric Mean (GM)}$", "$\\text{Geometric CV (%GCV)}$",
+  "Time to C$_{max}$ (T$_{max}$)", "Non-Normal (Discrete)", "$\\text{Median}$", "$\\text{Range (Min - Max)}$"
+)
+
+# Render the kable table with styling for HTML
+pk_summary %>%
+  kbl(
+    caption = "Preferred summary statistics for key pharmacokinetic parameters (FDA)",
+    booktabs = TRUE,
+    align = 'lccc',
+    col.names = c("PK Parameter", "Underlying Distribution", "Preferred Central Tendency", "Preferred Variability Measure")
+  ) %>%
+  # Apply HTML styling (Bootstrap)
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"), 
+    full_width = FALSE
+  ) %>% 
+  # Set the background color for the header row
+  row_spec(0, background = "#D5D5D5", bold = TRUE) %>%
+  # Add a footer to define acronyms and rationale
+  footnote(
+    general = "AUC and Cmax are summarized using geometric statistics due to their log-normal distribution. Tmax is summarized using non-parametric statistics (Median and Range) because its observed values are discrete time points.", 
+    footnote_as_chunk = TRUE, 
+    general_title = "Note:"
+  )
+```
+
+<br>
+
+### Task: From the IV and oral data
+
+-   Calculate the geometric mean $C_{max}$ and $AUC$ 
+-   Calculate the geometric coefficient of variation for these parameters
+-   Estimate $T_max$ (median and range)
+
+```{r log-pk}
+# This code calculates both GM and %GCV for Cmax.
+# %GCV uses the variance of the log-transformed data.
+# I am going to use dataset A (because Tmax is 0 for all IV)
+
+dataset_B %>%
+  # 1. Log the concentrations and then find the maximum log concentration (log(Cmax))
+  group_by(ID) %>%
+  summarise(log_cmax = max(log(conc))) %>%
+  ungroup() %>%
+  # 2. Summarize the Geometric Mean (GM) and Percent Geometric CV (%GCV)
+  summarise(
+    # GM: Antilog of the mean of the logs
+    GM_cmax = exp(mean(log_cmax)),
+    
+    # %GCV: 100 * sqrt(exp(variance of logs) - 1)
+    percent_GCV = 100 * sqrt(exp(var(log_cmax)) - 1)
+  )
+
+
+# Code to pull out Tmax for each ID
+tmax_data <- dataset_B %>%
+  # 1. Group the data by subject (ID)
+  group_by(ID) %>%
+  # 2. Filter to keep only the row(s) where 'conc' equals the maximum concentration
+  #    Note: If Cmax occurs at multiple times, this will return multiple rows per ID.
+  filter(conc == max(conc)) %>%
+  # 3. Select the time column (time) and pull the value(s)
+  summarise(tmax = time) %>%
+  # 4. Remove the grouping structure
+  ungroup()
+
+# Code to get the final Median and Range summary for Tmax
+tmax_summary <- tmax_data %>%
+  summarise(
+    Median_Tmax = median(tmax),
+    Min_Tmax = min(tmax),
+    Max_Tmax = max(tmax)
+  )
+
+print(tmax_summary)
+```
+
+```{r log-pknca}
+# The code above is complex. There is a package that simplifies this. 
+# install.packages("PKNCA")
+library(PKNCA)
+
+# The PKNCA package is designed for this type of calculation.
+dataset_B %>%
+  # 1. Group by ID to calculate Cmax for each subject
+  group_by(ID) %>%
+  summarise(cmax = max(conc)) %>%
+  ungroup() %>%
+  # 2. Use the geomean() function to get both GM and %GCV simultaneously. This is less code to write!
+  summarise(
+    GM_cmax = geomean(cmax), 
+    percent_GCV = geocv(cmax) # or specifically geocv()
+  )
+```
+
+# Part 2
+
 
 ## Bioavailability
 
@@ -419,68 +1032,105 @@ Bioavailability (F) is the % of administered drug that reaches the systemic circ
 
 <br>
 
-$$Bioavailability (F) = 100 .  \frac{AUC_{PO}}{AUC_{IV}}$$
-<br>
+$$Bioavailability (F) = 100 .  \frac{AUC_{PO}}{AUC_{IV}}$$ <br>
 
-Where the doses given orally and intravenously are not the same, this formula can be used to account for this. 
-
+Where the doses given orally and intravenously are not the same, this formula can be used to account for this.
 
 $$Bioavailability (F) = 100 .  \frac{AUC_{PO}.D_{IV}}{AUC_{IV}. D_{PO}}$$
-
 
 <br>
 
 ### Task
 
-* Calculate the bioavailability of Drug X
+-   Calculate the bioavailability of Drug X
 
+```{r, eval=TRUE, results='hold', tidy=FALSE}
+  
+dataset_A <- read.csv("https://raw.githubusercontent.com/dlonsdal/SGUL_PK_data/refs/heads/main/pk2_param_estimate/dataset_A.csv")
+dataset_B <- read.csv("https://raw.githubusercontent.com/dlonsdal/SGUL_PK_data/refs/heads/main/pk2_param_estimate/dataset_B.csv")
+
+```
+
+```{r time,echo = FALSE, eval = FALSE, message=FALSE}
+
+library(dplyr)
+library(PKNCA) # Required for geomean() and geocv()
+
+## 1. Combine the oral and IV datasets and explicitly assign study groups
+full <- rbind(
+  mutate(dataset_B, study = "ORAL"),
+  mutate(dataset_A, study = "IV")
+)
+
+## 2. Estimate the individual AUC for each ID and study
+individual_AUC <- full %>% 
+  group_by(ID, study) %>%
+  # Note: AUC function is assumed to be available
+  summarise(AUC = AUC(time, conc, method = 'trapezoid'), .groups = 'drop') 
+
+individual_AUC %>%
+  # Spread the data so ORAL and IV are in separate columns for the ratio
+  pivot_wider(names_from = study, values_from = AUC) %>%
+  
+  # Calculate the individual F ratio for each subject
+  mutate(Individual_F_ratio = ORAL / IV) %>%
+  
+  # Calculate the Geometric Mean of the individual F ratios
+  summarise(
+    F_percent = 100 * geomean(Individual_F_ratio),
+    # The GCV for F is simply geocv() of the ratios:
+    GCV_percent_F = geocv(Individual_F_ratio) 
+  )
+```
+
+```{r}
+library(dplyr)
+library(DescTools) # Used for the AUC() function
+
+## 1. Combine the oral and IV datasets, correctly assigning study groups (A=IV, B=ORAL)
+full <- rbind(
+  mutate(dataset_A, study = "IV"),    
+  mutate(dataset_B, study = "ORAL")  
+)
+
+## 2. Estimate the individual AUC for each ID and study
+individual_AUC <- full %>% 
+  group_by(ID, study) %>%
+  # Use DescTools::AUC to calculate the Area Under the Curve
+  summarise(AUC = AUC(x = time, y = conc, method = "trapezoid"), .groups = 'drop') 
+
+## 3. Calculate the geometric summary (gAUC, %GCV, and variance) for each study
+geometric_summary <- individual_AUC %>% 
+  group_by(study) %>% 
+  summarise(
+    # Geometric Mean (GM) calculation using the base R formula: exp(mean(log(AUC)))
+    gAUC = exp(mean(log(AUC))),
+    .groups = 'drop'
+  )
+
+## 4. Final summary: F (Oral/IV) and its approximate variability
+geometric_summary %>% 
+  summarise(
+    # F is the primary result: Ratio of Geometric Means (ORAL / IV)
+    F_percent = 100 * (gAUC[study == "ORAL"] / gAUC[study == "IV"])
+  )
+
+
+```
+
+What value did you estimate for bioavailability? What do you think of this value and do you think this drug is highly bioavailable via oral administration?
 
 <br>
-
-```{r time,echo=TRUE, message=FALSE}
-
-## first, combine the oral and IV datasets
-full <- rbind(dataset_A, dataset_B)
-
-## estimate the mean AUC (mAUC) for the oral and the IV study
-full %>% 
-  group_by(ID,study) %>% 
-  summarise(AUC=AUC(time,conc,method='trapezoid')) %>% 
-  group_by(study)  %>% 
-  summarise(mAUC=
-              mean(AUC))
-
-## now, use the equation above to estimate bioavailability
-full %>% 
-  group_by(ID,study) %>% 
-  summarise(AUC=AUC(time,conc,method='trapezoid')) %>% 
-  group_by(study)  %>% 
-  summarise(mAUC=
-              mean(AUC)) %>% 
-  summarise(F=100*(mAUC[study=="ORAL"]/mAUC[study=="IV"]))
-
-``` 
-
-What value did you estimate for bioavailability? 
-What do you think of this value and do you think this drug is highly bioavailable via oral administration? 
-
-<br>
-
-
-<br>
-
-# Part 2
 
 ## Bioequivalence
 
-When drugs are developed as alternatives for an existing (reference) drug, for example a generic alternative to a commercially available drug, developers must demonstrate that they have very similar or equivalent pharmacological profiles and therefore we would expect their clinical efficacy and safety to be the same. 
+When drugs are developed as alternatives for an existing (reference) drug, for example a generic alternative to a commercially available drug, developers must demonstrate that they have very similar or equivalent pharmacological profiles and therefore we would expect their clinical efficacy and safety to be the same.
 
-The FDA define bioequivalence as:
-"The absence of a significant difference in the rate and extent to which the active ingredient becomes available at the site of drug action when administered at the same dose under similar experimental conditions"
+The FDA define bioequivalence as: "The absence of a significant difference in the rate and extent to which the active ingredient becomes available at the site of drug action when administered at the same dose under similar experimental conditions"
 
 <br>
 
-````{r, eval=TRUE, echo=FALSE, message=FALSE}
+```{r, eval=TRUE, echo=FALSE, message=FALSE}
 
 library(linpk)
 library(gridExtra)
@@ -514,7 +1164,8 @@ plota <- ggplot(data=bio, aes(x=time, y=conc, group=interaction(drug)))+
   geom_line()+
   xlab("Time after dose")+
   ylab("Plasma concentration")+
-  labs(title="Products are bioequivalent")+ylim(0, 20)+theme_bw()
+  labs(title="Products are bioequivalent")+ylim(0, 20)+
+  theme_bw()
 
 cl=2
 vc=18
@@ -531,20 +1182,20 @@ plotb <- ggplot(data=nbio, aes(x=time, y=conc, group=interaction(drug)))+
   geom_line()+
   xlab("Time after dose")+
   ylab("Plasma concentration")+
-  labs(title="Products are not bioequivalent")+ylim(0, 20)+theme_bw()
+  labs(title="Products are not bioequivalent")+ylim(0, 20)+
+  theme_bw()
 
 grid.arrange(plota,plotb,ncol=2)
 
-````
+```
 
-
-````{r, echo=FALSE, out.width="40%", }
+```{r, echo=FALSE, out.width="40%", }
 ## knitr::include_graphics("")
-````
-<br>
-<br>
+```
 
-````{r, eval=FALSE, echo=FALSE}
+<br> <br>
+
+```{r, eval=FALSE, echo=FALSE}
 library(linpk)
 set.seed(2002)
 
@@ -595,73 +1246,66 @@ test$drug <- "test"
 dataset_c <- rbind(reference, test)
 write.csv(dataset_c, "dataset_C.csv", row.names = FALSE)
 
-````
+```
 
 ## Data for this session
 
-"Dataset_C.csv" contains pharmacokinetic data from a crossover study. 5 participants (a-e) were given a single oral 1000 mg dose of a reference antimicrobial drug, QMP. PK measurements were taken hourly for 24 hours following this administration. Following a washout period of 2 weeks, each participant was given a single oral 1000 mg dose of a test drug, PMP, which has been developed as a potential generic alternative to QMP. 
+"Dataset_C.csv" contains pharmacokinetic data from a crossover study. 5 participants (a-e) were given a single oral 1000 mg dose of a reference antimicrobial drug, QMP. PK measurements were taken hourly for 24 hours following this administration. Following a washout period of 2 weeks, each participant was given a single oral 1000 mg dose of a test drug, PMP, which has been developed as a potential generic alternative to QMP.
 
 For Part 2 of the session, we will look at these data and do some basic analysis to see whether PMP (test drug) might be bioequivalent to QMP (reference drug). We will then consider what FDA/EMA requirements for bioequivalence involve.
-
 
 <br>
 
 ### Task: Import and plot your data
 
-* Import your data
+-   Import your data
 
-* Plot your data
+-   Plot your data
 
 You can download the data for this session directly from GitHub. Copy and paste my code.
 
 ```{r ID,echo=TRUE, eval=TRUE}
 dataset_c <- read.csv("https://raw.githubusercontent.com/dlonsdal/SGUL_PK_data/refs/heads/main/pk2_param_estimate/dataset_C.csv")
   
-``` 
+```
 
+```{r, eval=FALSE}
 
-<br> 
+#*Troubleshooting**
 
-**Troubleshooting**
+# If you have used the same <TT>ggplot2</TT> code as for previous examples, you may have ended up with a strange looking plot! This is because we have grouped by ID, but each participant has 2 sets of data (study: reference or test - referring to the reference drug or the test drug)
 
-If you have used the same <TT>ggplot2</TT> code as for previous examples, you may have ended up with a strange looking plot! This is because we have grouped by ID, but each participant has 2 sets of data (study: reference or test - referring to the reference drug or the test drug)
-<br>
-
-````{r, echo=FALSE, eval=FALSE}
 ggplot(data=dataset_c, aes(x=time, y=conc, col=ID))+
   geom_line()+
   geom_point()+
   xlab("time (hours after dose)")+
   ylab("concentration (mg/L)")+
   labs(title="Incorrect concentration-time curve for crossover study of reference and test drugs")
-````
+```
 
-````{r, echo=FALSE, eval = TRUE, fig.cap="Incorrect concentration-time curve for crossover study of reference and test drugs",fig.width=7,fig.height=2.5,fig.align = 'center'}
+```{r, echo=FALSE, eval = TRUE, fig.cap="Incorrect concentration-time curve for crossover study of reference and test drugs",fig.width=7,fig.height=2.5,fig.align = 'center'}
 ggplot(data=dataset_c, aes(x=time, y=conc, col=ID))+
   geom_line()+
   geom_point()+
   xlab("time (hours after dose)")+
   ylab("concentration (mg/L)")
-````
+```
 
-<br>
+```{r, echo=TRUE, eval = FALSE}
 
-## Subset data
-You can use the function <TT>subset()</TT> to divide datasets into smaller groups (ie. to subset data). 
+### Subset data
+#You can use the function <TT>subset()</TT> to divide datasets into smaller groups (ie. to subset data). 
 
-For example, we can use this function to divide dataset_c into 2 datasets: 1 containing the data for the reference drug and one containing data for the test drug. We can then plot both sets of data separately. 
-
-<br>
-````{r, echo=TRUE, eval = FALSE}
+#For example, we can use this function to divide dataset_c into 2 datasets: 1 containing the data for the reference drug and one containing data for the test drug. We can then plot both sets of data separately.
 
 reference <- subset(dataset_c, drug=="reference")
 test <- subset(dataset_c, drug== "test")
 
 # Note the use of ==, this is what you need to use when using code to look for something being exactly a specific value. You need two, because it then allows for reasonable alternatives like >=
 
-````
+```
 
-````{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE, fig.cap="Concentration-time curve for crossover study: (a). Reference drug and (b). Test drug",fig.width=7,fig.height=2.5,fig.align = 'center'}
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE, fig.cap="Concentration-time curve for crossover study: (a). Reference drug and (b). Test drug",fig.width=7,fig.height=2.5,fig.align = 'center'}
 reference <- subset(dataset_c, drug=="reference")
 test <- subset(dataset_c, drug== "test")
 
@@ -681,21 +1325,19 @@ b <- ggplot(data=test, aes(x=time, y=conc, col=ID))+
 
 library(gridExtra)
 grid.arrange(a,b,ncol=2)
-````
+```
 
-<br>
+```{r, echo=TRUE, eval=FALSE}
+# ## Interaction function
 
-## Interaction function
+# You can also use this the <TT>interaction</TT> function in <TT>ggplot2</TT> to group by two factors in a plot. This allows us to plot dataset_c.
 
-You can also use this the <TT>interaction</TT> function in <TT>ggplot2</TT> to group by two factors in a plot. This allows us to plot dataset_c.
-
-````{r, echo=TRUE, eval=FALSE}
 ggplot(dataset_c, aes(x=time, y=conc, col=drug, shape=ID, group=interaction(ID, drug)))+
   geom_point()+
   geom_line()
-````
+```
 
-````{r, echo=FALSE, eval = TRUE, fig.cap="Concentration-time curve for crossover study",fig.width=7,fig.height=2.5,fig.align = 'center'}
+```{r, echo=FALSE, eval = TRUE, fig.cap="Concentration-time curve for crossover study",fig.width=7,fig.height=2.5,fig.align = 'center'}
 
 ggplot(dataset_c, aes(x=time, y=conc, col=drug, shape=ID, group=interaction(ID, drug)))+
   geom_point()+
@@ -703,92 +1345,107 @@ ggplot(dataset_c, aes(x=time, y=conc, col=drug, shape=ID, group=interaction(ID, 
   xlab("time (hours after dose)")+
   ylab("concentration (mg/L)")
 
-````
+```
+
 <br>
 
 ## Estimations
 
 ### Task: Subset data and estimate parameters
 
-* Subset the data into reference and test drug datasets if you have not already done so
+-   Subset the data into reference and test drug datasets if you have not already done so
 
-* Estimate Cmax and $AUC_{0-24}$ for the reference drug
+-   Estimate Cmax and $AUC_{0-24}$ for the reference drug
 
-* Estimate Cmax and $AUC_{0-24}$ for the test drug
+-   Estimate Cmax and $AUC_{0-24}$ for the test drug
 
+-   Estimate the ratio between Cmax for the test drug and the reference drug
+
+-   Estimate the ratio between AUC for the test drug and the reference drug
+
+```{r, echo = TRUE, eval = TRUE}
+library(dplyr)
+library(DescTools)
+
+# 1. Calculate the individual AUC for each ID and drug
+individual_AUC <- dataset_c %>% 
+  group_by(ID, drug) %>%
+  # Calculate AUC 0-t (AUClast) using the trapezoidal rule
+  summarise(AUC = AUC(x = time, y = conc, method = "trapezoid"), .groups = 'drop') 
+individual_AUC
+# 2. Calculate the individual ratios by grouping on ID and subsetting
+# This step replaces pivot_wider() by pulling the two AUC values onto one row.
+individual_ratios <- individual_AUC %>%
+  group_by(ID) %>%
+  summarise(
+    # Subsetting the AUC vector where 'drug' equals 'test' or 'reference'
+    AUC_Test = AUC[drug == "test"],
+    AUC_Reference = AUC[drug == "reference"],
+    .groups = "drop"
+  ) %>%
+  
+  # Calculate the AUC ratio Test/Reference for each individual
+  mutate(AUC_Ratio = AUC_Test / AUC_Reference)
+individual_ratios
+# 3. Final summary: Calculate the Geometric Mean Ratio (GMR) and its variability
+final_summary <- individual_ratios %>% 
+  summarise(
+    # Geometric Mean Ratio (GMR): exp(mean(log(Ratio)))
+    GMR_AUC = exp(mean(log(AUC_Ratio)))
+  )
+
+# Display the final summary table
+final_summary
+
+
+library(dplyr)
+
+# 1. Calculate the individual Cmax for each ID and drug
+individual_Cmax <- dataset_c %>% 
+  group_by(ID, drug) %>%
+  # Cmax is simply the maximum observed concentration
+  summarise(Cmax = max(conc), .groups = 'drop') 
+individual_Cmax
+
+# 2. Calculate the individual Cmax ratios by grouping on ID and subsetting
+# This step pulls the two Cmax values (Test and Reference) onto one row per subject.
+individual_ratios_cmax <- individual_Cmax %>%
+  group_by(ID) %>%
+  summarise(
+    # Subsetting the Cmax vector where 'drug' equals 'test' or 'reference'
+    Cmax_Test = Cmax[drug == "test"],
+    Cmax_Reference = Cmax[drug == "reference"],
+    .groups = "drop"
+  ) %>%
+  
+  # Calculate the Cmax ratio Test/Reference for each individual
+  mutate(Cmax_Ratio = Cmax_Test / Cmax_Reference)
+individual_ratios_cmax
+
+# 3. Final summary: Calculate the Geometric Mean Ratio (GMR) and its variability
+final_summary_cmax <- individual_ratios_cmax %>% 
+  summarise(
+    # Geometric Mean Ratio (GMR): exp(mean(log(Ratio)))
+    GMR_Cmax = exp(mean(log(Cmax_Ratio)))
+  )
+
+# Display the final summary table
+final_summary_cmax
+```
 
 <br>
 
-````{r, Echo=TRUE, Eval=TRUE}
-reference <- subset(dataset_c, drug=="reference")
-test <- subset(dataset_c, drug== "test")
+What do you think of these results? Do you think these drugs might be bioequivalent?
 
-# REFERENCE DRUG: Cmax
-R_Cmax <- reference%>%
-  group_by(ID)%>%
-  summarise(cmax=max(conc)) %>% 
-  ungroup() %>% 
-  summarise(mean(cmax))
-
-# REFERENCE DRUG: AUC
-R_AUC <- reference %>% 
-  group_by(ID) %>% 
-  summarise(AUC=AUC(time,conc,method='trapezoid')) %>% 
-  ungroup()  %>% 
-  summarise(mAUC=
-              mean(AUC)) 
-
-# TEST DRUG: Cmax
-T_Cmax <- test%>%
-  group_by(ID)%>%
-  summarise(cmax=max(conc)) %>% 
-  ungroup() %>% 
-  summarise(mean(cmax))
-
-# TEST DRUG: AUC
-T_AUC <- test %>% 
-  group_by(ID) %>% 
-  summarise(AUC=AUC(time,conc,method='trapezoid')) %>% 
-  ungroup()  %>% 
-  summarise(mAUC=
-              mean(AUC)) 
-
-
-````
+Now let's think about what developers must do to demonstrate bioequivalence. You have touched upon this during a session in PK I.
 
 <br>
-
-
-* Estimate the ratio between Cmax for the test drug and the reference drug
-
-* Estimate the ratio between AUC for the test drug and the reference drug
-
-
-````{r, echo=TRUE, eval= TRUE}
-
-# RATIO OF TEST CMAX TO REFERENCE CMAX (%)
-(T_Cmax/R_Cmax)*100
-
-# RATIO OF TEST AUC TO REFERENCE AUC (%)
-(T_AUC/R_AUC)*100
-
-````
-
-<br>
-
-What do you think of these results? 
-Do you think these drugs might be bioequivalent? 
-
-Now let's think about what developers must do to demonstrate bioequivalence. You have touched upon this during a session in PK I. 
-
-<br>
-
 
 ## Estimating $AUC_{0-t}$
 
-With our estimations so far we have used the trapezoidal rule to calculate $AUC_{0-t}$. Do you remember what this means? 
+With our estimations so far we have used the trapezoidal rule to calculate $AUC_{0-t}$. Do you remember what this means?
 
-````{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
 
 library(linpk)
 library(gridExtra)
@@ -832,28 +1489,25 @@ plotd <- ggplot(data=sim, aes(x=time, y=conc))+
 library(gridExtra)
 grid.arrange(plotc, plotd,ncol=2)
 
-````
+```
 
 <br>
 
-When we estimate AUC, we estimate until our last timepoint, or $AUC_{0-t}$. This is not the same as the total drug exposure. 
+When we estimate AUC, we estimate until our last timepoint, or $AUC_{0-t}$. This is not the same as the total drug exposure.
 
-In sessions today we have looked at $AUC_{0-24}$ and our studies have measured upto 24 hours only. In our first plot we can see $AUC_{0-24}$ shaded in green, but additional drug exposure beyond 24 hours is shaded in lilac in the second graph. To calculate total drug exposure, we must combine the measured drug exposure and account for any further exposure beyond the last measured concentration. 
+In sessions today we have looked at $AUC_{0-24}$ and our studies have measured upto 24 hours only. In our first plot we can see $AUC_{0-24}$ shaded in green, but additional drug exposure beyond 24 hours is shaded in lilac in the second graph. To calculate total drug exposure, we must combine the measured drug exposure and account for any further exposure beyond the last measured concentration.
 
-This is estimated as AUC 0 to infinity, or $AUC_{0-\infty}$. 
+This is estimated as AUC 0 to infinity, or $AUC_{0-\infty}$.
 
-This is more advanced work that will be covered during the Advanced PK module - we hope to see you then! 
+This is more advanced work that will be covered during the Advanced PK module - we hope to see you then!
 
 <br>
-
 
 # Advanced & further work
 
-* Use '<TT>R</TT>' to produce a plot of concentration-time data displaying mean and error bars (e.g. for 95% confidence interval or standard error).  
-* Understand the FDA and EMA requirements for proving bioequivalence above the basic calculation we have performed.
-* Calculate $AUC_{0-\infty}$.
-* Advanced calculations required as evidence of bioequivalence for FDA/EMA approval.
-
-
+-   Use '<TT>R</TT>' to produce a plot of concentration-time data displaying mean and error bars (e.g. for 95% confidence interval or standard error).\
+-   Understand the FDA and EMA requirements for proving bioequivalence above the basic calculation we have performed.
+-   Calculate $AUC_{0-\infty}$.
+-   Advanced calculations required as evidence of bioequivalence for FDA/EMA approval.
 
 <br>
