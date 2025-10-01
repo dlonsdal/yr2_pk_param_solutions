@@ -840,8 +840,8 @@ library(dplyr)
 # NOTE: The double backslashes for the math (\bar{x}) MUST remain inside the string
 data <- tribble(
   ~Measure, ~`Central Tendency`, ~`Variability Measure`, ~`Formula for Variability`, ~`Appropriate for`,
-  "Arithmetic", "Arithmetic Mean ($\\bar{x}$ or $\\text{AM}$)", "$\\text{%CV}$", "$\\left( \\frac{s}{\\bar{x}} \\right) \\times 100$", "$\\text{Normal}$ (Symmetrical) Data",
-  "Geometric", "Geometric Mean ($\\text{GM}$)", "$\\text{%GCV}$", "$\\sqrt{\\exp(s_{\\ln}^2) - 1} \\times 100$", "$\\text{Log-Normal}$ (Skewed) Data"
+  "Arithmetic", "Arithmetic Mean ($\\bar{x}$ or $\\text{AM}$)", "$\\%\\text{CV}$", "$\\left( \\frac{s}{\\bar{x}} \\right) \\times 100$", "$\\text{Normal}$ (Symmetrical) Data",
+  "Geometric", "Geometric Mean ($\\text{GM}$)", "$\\%\\text{GCV}$", "$\\sqrt{\\exp(s_{\\ln}^2) - 1} \\times 100$", "$\\text{Log-Normal}$ (Skewed) Data"
 )
 
 # Render the kable table with shading and alignment for HTML
@@ -871,10 +871,10 @@ data_both_variability_final <- tribble(
   ~Measure, ~`Statistical Parameter`, ~`Value Type`, ~`Interpretation`,
   # --- ARITHMETIC MEASURES ---
   "arithmetic", "standard deviation (SD)", "unit of measure", "absolute measure of spread. the $68\\%$ range is $\\text{AM} \\pm 1 \\cdot \\text{SD}$ (additive).",
-  "arithmetic", "coefficient of variation (%CV)", "percentage ($\\text{%}$)", "relative measure of spread around the AM. used for normally distributed data.",
+  "arithmetic", "coefficient of variation (%CV)", "percentage ($\\%$)", "relative measure of spread around the AM. used for normally distributed data.",
   # --- GEOMETRIC MEASURES ---
   "geometric", "geometric standard deviation (GSD)", "factor (unitless, $\\text{>}1$)", "the multiplicative factor of spread. the $68\\%$ range is $\\text{GM}/\\text{GSD}$ to $\\text{GM} \\times \\text{GSD}$ (multiplicative).",
-  "geometric", "geometric coefficient of variation (%GCV)", "percentage ($\\text{%}$)", "relative symmetrical scatter around the geometric mean (GM). preferred for log-normal data."
+  "geometric", "geometric coefficient of variation (%GCV)", "percentage ($\\%$)", "relative symmetrical scatter around the geometric mean (GM). preferred for log-normal data."
 )
 
 # Render the kable table with styling for HTML
