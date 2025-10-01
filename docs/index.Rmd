@@ -426,7 +426,7 @@ Where:
 * $x_i$ are the individual data points in the sample. 
 * $n$ is the sample size (the number of data points in the sample)
 
-For example, if we have the set of numbers $\{5, 8, 11, 15, 21\}$, the arithmetic mean ($\mu$) is calculated as:
+For example, if we have the set of numbers $\{5, 8, 11, 15, 21\}$, the arithmetic mean is calculated as:
 
 $$\bar{x} = \frac{5 + 8 + 11 + 15 + 21}{5} = \frac{60}{5} = 12$$ However, the mean is not always the preferred measure of central tendency. Its most significant limitation is its sensitivity to extreme values (outliers) and/or data that is skewed/asymetrical in distribution. For example if we replace $21$ with $100$ in the above set, the mean is heavily influenced by the $100$ outlier.
 
