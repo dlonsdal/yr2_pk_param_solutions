@@ -887,7 +887,7 @@ data_both_variability_final_full_eq <- tribble(
   # --- ARITHMETIC MEASURES ---
   "arithmetic", 
   "coefficient of variation (%CV)", 
-  "$$\\text{%CV} = \\left( \\frac{s}{\\bar{x}} \\right) \\times 100$$", 
+  "$$\\%\\text{CV} = \\left( \\frac{s}{\\bar{x}} \\right) \\times 100$$", 
   "relative measure of spread around the AM. used for normally distributed data.", 
   
   "arithmetic", 
@@ -899,7 +899,7 @@ data_both_variability_final_full_eq <- tribble(
   # --- GEOMETRIC MEASURES ---
   "geometric", 
   "geometric coefficient of variation (%GCV)", 
-  "$$\\text{%GCV} = \\sqrt{\\exp(s_{\\ln}^2) - 1} \\times 100$$", 
+  "$$\\%\\text{GCV} = \\sqrt{\\exp(s_{\\ln}^2) - 1} \\times 100$$", 
   "relative symmetrical scatter around the geometric mean (GM). preferred for log-normal data.", 
   
   "geometric", 
