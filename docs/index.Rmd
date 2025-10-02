@@ -62,15 +62,23 @@ In part 2, we will learn how to estimate bioavailability and we will recap the c
 
 ## Learning outcomes
 
--   Recap use of <TT>RStudio</TT> and <TT>ggplot2</TT> to plot pharmacokinetic data and estimate some pharmacokinetic parameters
+Part 1
+
+-   Recap use of <TT>R</TT> and <TT>ggplot2</TT> to plot pharmacokinetic data and estimate some pharmacokinetic parameters
 -   Save plots made using <TT>ggplot2</TT>
 -   Estimate Cmax and $AUC_{0-t}$
--   Estimate bioavailability
--   Basic estimation of bioequivalence
 -   Understand the difference between arithmetic and geometric means
 -   Know when to use the arithemtic mean, median and geometric mean in pharmacokinetic analysis
--   Know how to present variability of pharmacokinetic data (% geometric coefficient of variation)
--   Describe the concept of a drug with high inter-individual variability
+-   Know how variability of pharmacokinetic data is presented (% geometric coefficient of variation)
+-   Describe (quantitatively) how a drug with high inter-individual variability is identified in pharmacokinetic analysis
+
+
+Part 2
+
+-   Explain how to calculate bioavailability from pharmacokinetic data
+-   Calculate bioavailability from some data in <TT>R</TT>
+-   Explain how to calculate bioequivalence from pharmacokinetic data
+-   Calculate bioequivalence from some data in <TT>R</TT>
 -   Understand the concept of $AUC_{0-\infty}$
 
 ## Further learning
