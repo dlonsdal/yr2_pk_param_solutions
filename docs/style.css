@@ -1,0 +1,23 @@
+/* 1. STYLES FOR FIGURE CAPTIONS (.caption) */
+.caption {
+  /* Narrows the caption text block */
+  margin-left: 2%;
+  margin-right: 2%;
+  
+  /* SETS TEXT ALIGNMENT TO JUSTIFIED */
+  text-align: justify;
+}
+
+/* 2. STYLES FOR FIGURES (Plots/Images) */
+figure {
+  /* Ensures the figure acts as a block element */
+  display: block;
+  
+  /* Centers the figure element horizontally (0 top/bottom, auto left/right) */
+  margin: 0 auto;
+}
+
+/* Optional: If you only want to target the body of the table (excluding the header) */
+ td {
+  vertical-align: middle !important;
+} 
